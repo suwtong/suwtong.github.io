@@ -1,47 +1,25 @@
-<!doctype html>
-<html lang="{{ page.lang | default: site.lang }}">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+---
+layout: home-page
+---
+{% include calculate_relative_base.html %}
 
-    {% seo %}
-
-    <link rel="icon" href="https://avatars0.githubusercontent.com/u/1797320" type="image/x-icon" title="scottcgi">
-    <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
-    
-    <script src="{{ '/assets/js/scale.fix.js' | relative_url }}"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-
-  </head>
-  <body>
-    <div class="wrapper">
-      <header {% unless site.description or site.github.project_tagline %} class="without-description" {% endunless %}>
-        <h1>{{ site.title | default: site.github.repository_name }}</h1> 
-        <p>{{ page.description | default: site.description }}</p>
-       
-        <ul>
-        {% for item in site.nav %}
-          {% if page.url == item.link %}
-            <li style="background-color:#069">
-              <a href="{{ item.link }}">
-                <strong>{{ item.name }}</strong>
-              </a>
-            </li>
-          {% else %}
-            <li><a href="{{ item.link }}">{{ item.name }}</a></li>
-          {% endif %}
-        {% endfor %}
-        </ul>
-      </header>
-      <section>
-
-      {{ content }}
-
-      </section>
+<ol class="post-card-box clearfix">
+  {% for post in paginator.posts %}
+  {% include remove_double_slash.html %}
+  <li>
+    <div class="post-card">
+      <a href="{{ post_url }}" title="{{ post.title }}" class="post-card-image" style="background: url('{{ relativebase }}assets/img/{{ post.img }}') center no-repeat; background-size: cover;">
+      </a>
+      <div class="post-card-body">
+        <p class="post-card-title-and-meta">
+          
+          <a href="{{ post_url }}" class="post-card-link">
+          {{ post.title }}
+          </a>
+          {% include post_meta.html type="post-card-meta" date="none" %}
+        </p>
+      </div>
     </div>
-    
-    <footer>
-      <p>{{ site.copyright | default: "copyright not found in _config.yml" }}</p>
-    </footer>
-  </body>
-</html>
+  </li>
+  {% endfor %}
+</ol>
