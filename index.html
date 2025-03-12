@@ -1,17 +1,134 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <title>计算机体系结构学习</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>技术博客 | CPU/GPU与影评</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --text-color: #34495e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            line-height: 1.6;
+            color: var(--text-color);
+        }
+
+        /* 导航栏样式 */
+        .navbar {
+            background: var(--primary-color);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: var(--secondary-color);
+        }
+
+        /* 主体内容容器 */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* 模块卡片样式 */
+        .module-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        h1, h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .nav-links {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>欢迎来到粟维桐的博客（预）</h1>
-        <nav>
-            <ul>
-                <li><a href="https://suwtong.github.io/CHI.learning">CHI</a></li>
-                <li><a href="https://suwtong.github.io/PIPELINE">PIPELINE</a></li>
-            </ul>
-        </nav>
-    </header>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <ul class="nav-links">
+            <li><a href="#cpu">CPU知识体系</a></li>
+            <li><a href="#gpu">GPU知识体系</a></li>
+            <li><a href="#reviews">个人影评</a></li>
+        </ul>
+    </nav>
+
+    <!-- 主体内容 -->
+    <div class="container">
+        <!-- CPU模块 -->
+        <section id="cpu" class="module-card">
+            <h2>CPU知识体系</h2>
+            <h3>处理器架构</h3>
+            <p>从x86到ARM，解析不同架构的设计哲学...</p>
+            <h3>性能优化</h3>
+            <p>缓存机制、流水线设计、超线程技术...</p>
+            <h3>最新动态</h3>
+            <p>量子计算对传统CPU的影响...</p>
+        </section>
+
+        <!-- GPU模块 -->
+        <section id="gpu" class="module-card">
+            <h2>GPU知识体系</h2>
+            <h3>图形流水线</h3>
+            <p>顶点着色器、光栅化、像素着色器...</p>
+            <h3>并行计算</h3>
+            <p>CUDA核心、SIMT架构、显存管理...</p>
+            <h3>行业应用</h3>
+            <p>深度学习中的GPU加速原理...</p>
+        </section>
+
+        <!-- 影评模块 -->
+        <section id="reviews" class="module-card">
+            <h2>电影评论</h2>
+            <div class="review">
+                <h3>《沙丘》观影笔记</h3>
+                <p>维伦纽瓦的视觉美学在IMAX银幕上的震撼呈现...</p>
+            </div>
+            <div class="review">
+                <h3>动画电影分析</h3>
+                <p>新海诚作品中的时空叙事结构研究...</p>
+            </div>
+        </section>
+    </div>
 </body>
 </html>
