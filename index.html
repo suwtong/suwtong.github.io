@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>技术博客 | CPU/GPU与影评</title>
+    <title>suweitong 个人博客</title>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -68,6 +68,35 @@
             border-left: 4px solid var(--secondary-color);
         }
 
+        .banner-image {
+            width: 100%;
+            max-height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            align-items: center;
+            margin: 1.5rem 0;
+        }
+
+        .content-image {
+            width: 100%;
+            border: 3px solid #eee;
+            padding: 5px;
+            background: white;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         h1, h2 {
             color: var(--primary-color);
             margin-bottom: 1rem;
@@ -80,6 +109,26 @@
                 text-align: center;
                 gap: 1rem;
             }
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .gallery img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            cursor: zoom-in;
+            transition: transform 0.3s;
+            border-radius: 4px;
+        }
+
+        .gallery img:hover {
+            transform: scale(1.05);
         }
     </style>
 </head>
@@ -97,38 +146,85 @@
     <div class="container">
         <!-- CPU模块 -->
         <section id="cpu" class="module-card">
+            <img src="CPU/label.png" 
+                 alt="CPU架构解析" 
+                 class="banner-image">
             <h2>CPU知识体系</h2>
-            <h3>处理器架构</h3>
+            <!-- <h3>处理器架构</h3>
             <p>从x86到ARM，解析不同架构的设计哲学...</p>
             <h3>性能优化</h3>
             <p>缓存机制、流水线设计、超线程技术...</p>
             <h3>最新动态</h3>
-            <p>量子计算对传统CPU的影响...</p>
+            <p>量子计算对传统CPU的影响...</p> -->
         </section>
 
         <!-- GPU模块 -->
         <section id="gpu" class="module-card">
             <h2>GPU知识体系</h2>
-            <h3>图形流水线</h3>
+            <div class="content-grid">
+                <img src="GPU/label.png" 
+                     alt="GPU架构图"
+                     class="content-image">
+                <div class="text-content">
+                    <h3>图形流水线</h3>
+                    <p>现代GPU的并行计算架构示意图...</p>
+                </div>
+            </div>
+            <!-- <h3>图形流水线</h3>
             <p>顶点着色器、光栅化、像素着色器...</p>
             <h3>并行计算</h3>
             <p>CUDA核心、SIMT架构、显存管理...</p>
             <h3>行业应用</h3>
-            <p>深度学习中的GPU加速原理...</p>
+            <p>深度学习中的GPU加速原理...</p> -->
         </section>
 
         <!-- 影评模块 -->
         <section id="reviews" class="module-card">
             <h2>电影评论</h2>
-            <div class="review">
+            <div class="gallery">
+                <!-- 影评相关图片 -->
+                <img src="CPU/label.png" alt="沙丘剧照" onclick="openLightbox(this)">
+                <img src="GPU/label.png" alt="新海诚作品" onclick="openLightbox(this)">
+                <img src="影评/label.png" alt="电影胶片" onclick="openLightbox(this)">
+            </div>
+            <!-- <div class="review">
                 <h3>《沙丘》观影笔记</h3>
                 <p>维伦纽瓦的视觉美学在IMAX银幕上的震撼呈现...</p>
             </div>
             <div class="review">
                 <h3>动画电影分析</h3>
                 <p>新海诚作品中的时空叙事结构研究...</p>
-            </div>
+            </div> -->
         </section>
     </div>
 </body>
+
+<script>
+    // 简易灯箱效果
+    function openLightbox(img) {
+        const overlay = document.createElement('div');
+        overlay.style = `
+            position: fixed;
+            top:0; left:0;
+            width:100vw; height:100vh;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            cursor: zoom-out;
+        `;
+        overlay.onclick = () => overlay.remove();
+        
+        const largeImg = new Image();
+        largeImg.src = img.src;
+        largeImg.style.maxWidth = '80vw';
+        largeImg.style.maxHeight = '80vh';
+        
+        overlay.appendChild(largeImg);
+        document.body.appendChild(overlay);
+    }
+</script>
+
 </html>
+
