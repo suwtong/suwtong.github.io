@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="CPU架构学习新手指南 - 从零开始的完整学习路径">
+    <title>新手指南 - CPU架构学习平台</title>
+    
+    <link rel="stylesheet" href="../assets/css/main.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="../index-new.html" class="nav-logo">
+                <span>🎓</span>
+                <span>CPU架构学习平台</span>
+            </a>
+            
+            <button class="menu-toggle" aria-label="切换菜单">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <ul class="nav-menu">
+                <li><a href="../index-new.html" class="nav-link">首页</a></li>
+                <li><a href="../CPU/CPU架构知识体系.html" class="nav-link">知识地图</a></li>
+                <li><a href="../articles/index.html" class="nav-link">文章</a></li>
+                <li><a href="../about/index.html" class="nav-link">关于</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 主体内容 -->
+    <div class="container" style="margin-top: 2rem; margin-bottom: 4rem;">
+        <article class="card" style="max-width: 900px; margin: 0 auto; padding: 3rem;">
+            <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">🚀 新手指南</h1>
+            <p style="font-size: 1.125rem; color: var(--gray-600); margin-bottom: 2rem;">
+                欢迎来到CPU架构学习之旅！本指南将帮助你从零开始，系统化地掌握处理器设计的核心知识。
+            </p>
+
+            <!-- 欢迎部分 -->
+            <section style="margin-bottom: 3rem;">
+                <h2>👋 欢迎</h2>
+                <p>CPU（中央处理器）是计算机的"大脑"，理解CPU的工作原理对于计算机科学、软件工程、系统架构等领域都至关重要。</p>
+                
+                <div class="alert alert-info">
+                    <strong>💡 这个平台能帮你什么？</strong>
+                    <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+                        <li>系统化学习CPU架构知识</li>
+                        <li>从基础理论到高级设计的完整路径</li>
+                        <li>通俗易懂的讲解和丰富的示例</li>
+                        <li>追踪学习进度，循序渐进</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- 学习前的准备 -->
+            <section style="margin-bottom: 3rem;">
+                <h2>📚 学习前的准备</h2>
+                
+                <h3>需要的前置知识</h3>
+                <div class="grid grid-cols-2" style="margin-bottom: 1.5rem;">
+                    <div class="card" style="padding: 1.5rem;">
+                        <h4 style="color: var(--success); margin-bottom: 0.5rem;">✅ 必需</h4>
+                        <ul style="margin: 0;">
+                            <li>基本的计算机使用能力</li>
+                            <li>二进制和十六进制基础</li>
+                            <li>简单的逻辑思维</li>
+                        </ul>
+                    </div>
+                    <div class="card" style="padding: 1.5rem;">
+                        <h4 style="color: var(--info); margin-bottom: 0.5rem;">💡 加分项</h4>
+                        <ul style="margin: 0;">
+                            <li>编程经验（任何语言）</li>
+                            <li>数字电路基础</li>
+                            <li>操作系统概念</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <h3>推荐的学习资源</h3>
+                <ul>
+                    <li><strong>书籍</strong>：《计算机体系结构：量化研究方法》- Hennessy & Patterson</li>
+                    <li><strong>在线课程</strong>：Coursera、edX上的计算机体系结构课程</li>
+                    <li><strong>实践工具</strong>：RISC-V模拟器、Logisim数字电路模拟器</li>
+                </ul>
+
+                <h3>学习时间规划</h3>
+                <p>建议每周投入<strong>5-10小时</strong>学习时间，完整学完所有内容大约需要<strong>2-3个月</strong>。</p>
+            </section>
+
+            <!-- 学习路径 -->
+            <section style="margin-bottom: 3rem;">
+                <h2>🗺️ 学习路径</h2>
+                <p>我们为你规划了一条循序渐进的学习路径，分为四个阶段：</p>
+
+                <!-- 第一阶段 -->
+                <div class="card" style="margin-bottom: 1.5rem; border-left: 4px solid var(--theme-basic);">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <span style="display: inline-block; width: 50px; height: 50px; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border-radius: 50%; text-align: center; line-height: 50px; font-weight: 700; font-size: 1.5rem;">1</span>
+                        <div>
+                            <h3 style="margin: 0;">基础理论</h3>
+                            <p style="margin: 0; color: var(--gray-600); font-size: 0.875rem;">预计学习时间：2-3周</p>
+                        </div>
+                    </div>
+                    
+                    <p><strong>学习目标：</strong>掌握计算机体系结构的基本概念和数字逻辑基础</p>
+                    
+                    <p><strong>核心内容：</strong></p>
+                    <ul>
+                        <li>冯·诺依曼架构与哈佛架构</li>
+                        <li>RISC vs CISC指令集设计</li>
+                        <li>数字逻辑：组合逻辑与时序逻辑</li>
+                        <li>时钟、时序分析与关键路径</li>
+                    </ul>
+                    
+                    <p><strong>推荐文章：</strong></p>
+                    <ul>
+                        <li><a href="../CPU/基础理论.html">📖 CPU基础理论</a> (30分钟)</li>
+                    </ul>
+                    
+                    <div class="alert alert-success">
+                        <strong>✨ 学习建议：</strong>这是整个学习过程的基石，务必打好基础。建议多画图、多思考，理解每个概念的本质。
+                    </div>
+                </div>
+
+                <!-- 第二阶段 -->
+                <div class="card" style="margin-bottom: 1.5rem; border-left: 4px solid var(--theme-arch);">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <span style="display: inline-block; width: 50px; height: 50px; background: linear-gradient(135deg, var(--theme-arch), var(--theme-memory)); color: white; border-radius: 50%; text-align: center; line-height: 50px; font-weight: 700; font-size: 1.5rem;">2</span>
+                        <div>
+                            <h3 style="margin: 0;">微架构设计</h3>
+                            <p style="margin: 0; color: var(--gray-600); font-size: 0.875rem;">预计学习时间：3-4周</p>
+                        </div>
+                    </div>
+                    
+                    <p><strong>学习目标：</strong>理解CPU内部的流水线、乱序执行等核心技术</p>
+                    
+                    <p><strong>核心内容：</strong></p>
+                    <ul>
+                        <li>流水线设计：五级流水线与超标量</li>
+                        <li>流水线冒险与解决方案</li>
+                        <li>分支预测技术</li>
+                        <li>乱序执行与指令重命名</li>
+                    </ul>
+                    
+                    <p><strong>推荐文章：</strong></p>
+                    <ul>
+                        <li>🚧 流水线设计（即将推出）</li>
+                        <li>🚧 分支预测（即将推出）</li>
+                        <li>🚧 乱序执行（即将推出）</li>
+                    </ul>
+                    
+                    <div class="alert alert-warning">
+                        <strong>⚠️ 难度提升：</strong>这个阶段概念较多且抽象，建议结合模拟器实践，加深理解。
+                    </div>
+                </div>
+
+                <!-- 第三阶段 -->
+                <div class="card" style="margin-bottom: 1.5rem; border-left: 4px solid var(--theme-memory);">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <span style="display: inline-block; width: 50px; height: 50px; background: linear-gradient(135deg, var(--theme-memory), var(--theme-perf)); color: white; border-radius: 50%; text-align: center; line-height: 50px; font-weight: 700; font-size: 1.5rem;">3</span>
+                        <div>
+                            <h3 style="margin: 0;">存储系统</h3>
+                            <p style="margin: 0; color: var(--gray-600); font-size: 0.875rem;">预计学习时间：2-3周</p>
+                        </div>
+                    </div>
+                    
+                    <p><strong>学习目标：</strong>掌握Cache、虚拟内存等存储层次结构</p>
+                    
+                    <p><strong>核心内容：</strong></p>
+                    <ul>
+                        <li>存储层次结构：寄存器、Cache、主存</li>
+                        <li>Cache设计：组织方式、替换策略、一致性</li>
+                        <li>虚拟内存：地址转换、页表、TLB</li>
+                        <li>内存一致性模型</li>
+                    </ul>
+                    
+                    <p><strong>推荐文章：</strong></p>
+                    <ul>
+                        <li><a href="../CPU/虚拟内存.html">📖 虚拟内存</a> (25分钟)</li>
+                        <li>🚧 Cache设计（即将推出）</li>
+                    </ul>
+                    
+                    <div class="alert alert-info">
+                        <strong>💡 实践建议：</strong>尝试分析实际程序的内存访问模式，理解局部性原理的重要性。
+                    </div>
+                </div>
+
+                <!-- 第四阶段 -->
+                <div class="card" style="margin-bottom: 1.5rem; border-left: 4px solid var(--theme-perf);">
+                    <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                        <span style="display: inline-block; width: 50px; height: 50px; background: linear-gradient(135deg, var(--theme-perf), var(--success)); color: white; border-radius: 50%; text-align: center; line-height: 50px; font-weight: 700; font-size: 1.5rem;">4</span>
+                        <div>
+                            <h3 style="margin: 0;">性能优化</h3>
+                            <p style="margin: 0; color: var(--gray-600); font-size: 0.875rem;">预计学习时间：2-3周</p>
+                        </div>
+                    </div>
+                    
+                    <p><strong>学习目标：</strong>学习功耗管理、并行技术和性能分析方法</p>
+                    
+                    <p><strong>核心内容：</strong></p>
+                    <ul>
+                        <li>功耗管理：动态功耗、静态功耗、DVFS</li>
+                        <li>多核架构与并行技术</li>
+                        <li>性能分析：CPI分析、性能计数器</li>
+                        <li>专用加速器：SIMD、AI加速器</li>
+                    </ul>
+                    
+                    <p><strong>推荐文章：</strong></p>
+                    <ul>
+                        <li>🚧 功耗管理（即将推出）</li>
+                        <li>🚧 性能分析（即将推出）</li>
+                    </ul>
+                    
+                    <div class="alert alert-success">
+                        <strong>🎯 进阶方向：</strong>完成这个阶段后，你已经具备了扎实的CPU架构知识，可以深入研究特定领域或参与实际项目。
+                    </div>
+                </div>
+            </section>
+
+            <!-- 学习建议 -->
+            <section style="margin-bottom: 3rem;">
+                <h2>💡 学习建议</h2>
+                
+                <h3>如何高效阅读技术文章</h3>
+                <ol>
+                    <li><strong>先浏览目录</strong>：了解文章结构和主要内容</li>
+                    <li><strong>标记重点</strong>：用笔记本或电子工具记录关键概念</li>
+                    <li><strong>画图理解</strong>：对于复杂概念，自己画图有助于理解</li>
+                    <li><strong>举一反三</strong>：思考概念的应用场景和实际例子</li>
+                    <li><strong>定期复习</strong>：利用平台的阅读进度功能，定期回顾</li>
+                </ol>
+
+                <h3>如何做笔记</h3>
+                <ul>
+                    <li><strong>康奈尔笔记法</strong>：分为笔记区、线索区、总结区</li>
+                    <li><strong>思维导图</strong>：用于梳理知识体系和概念关系</li>
+                    <li><strong>费曼技巧</strong>：用简单的语言解释复杂概念</li>
+                    <li><strong>代码实践</strong>：对于可以编程实现的概念，动手写代码</li>
+                </ul>
+
+                <h3>如何实践验证</h3>
+                <ul>
+                    <li><strong>使用模拟器</strong>：RISC-V模拟器、Logisim等工具</li>
+                    <li><strong>阅读开源代码</strong>：研究RISC-V、OpenSPARC等开源处理器</li>
+                    <li><strong>性能分析</strong>：使用perf等工具分析实际程序</li>
+                    <li><strong>参与讨论</strong>：加入技术社区，与他人交流</li>
+                </ul>
+            </section>
+
+            <!-- 常见问题 -->
+            <section style="margin-bottom: 3rem;">
+                <h2>❓ 常见问题</h2>
+                
+                <div class="card" style="margin-bottom: 1rem; background: var(--gray-50);">
+                    <h4>Q: 我没有任何硬件背景，能学会吗？</h4>
+                    <p style="margin: 0;">A: 完全可以！我们的内容从最基础开始，用通俗的语言讲解。只要你有学习的热情和耐心，就能掌握这些知识。</p>
+                </div>
+
+                <div class="card" style="margin-bottom: 1rem; background: var(--gray-50);">
+                    <h4>Q: 需要购买什么硬件或软件吗？</h4>
+                    <p style="margin: 0;">A: 不需要！所有学习资源都是免费的，推荐的模拟器和工具也都是开源免费的。</p>
+                </div>
+
+                <div class="card" style="margin-bottom: 1rem; background: var(--gray-50);">
+                    <h4>Q: 学完这些知识有什么用？</h4>
+                    <p style="margin: 0;">A: CPU架构知识对于系统编程、性能优化、编译器开发、操作系统开发等领域都非常重要。即使不直接从事硬件工作，这些知识也能帮助你写出更高效的代码。</p>
+                </div>
+
+                <div class="card" style="margin-bottom: 1rem; background: var(--gray-50);">
+                    <h4>Q: 学习过程中遇到问题怎么办？</h4>
+                    <p style="margin: 0;">A: 可以通过以下方式寻求帮助：
+                        <ul style="margin-top: 0.5rem;">
+                            <li>查看文章中的详细说明和示例</li>
+                            <li>参考推荐的学习资源</li>
+                            <li>在技术社区提问（如Stack Overflow）</li>
+                            <li>加入我们的学习交流群（即将推出）</li>
+                        </ul>
+                    </p>
+                </div>
+
+                <div class="card" style="margin-bottom: 1rem; background: var(--gray-50);">
+                    <h4>Q: 文章更新频率如何？</h4>
+                    <p style="margin: 0;">A: 我们会持续更新内容，计划每月新增2-3篇深度文章。你可以关注我们的更新动态。</p>
+                </div>
+            </section>
+
+            <!-- 开始学习 -->
+            <section style="text-align: center; padding: 2rem; background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 12px; color: white;">
+                <h2 style="color: white; margin-bottom: 1rem;">🎓 准备好了吗？</h2>
+                <p style="color: rgba(255,255,255,0.9); margin-bottom: 2rem;">
+                    现在就开始你的CPU架构学习之旅吧！
+                </p>
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <a href="../CPU/CPU架构知识体系.html" class="btn btn-secondary">查看知识地图</a>
+                    <a href="../CPU/基础理论.html" class="btn btn-secondary">开始第一课</a>
+                </div>
+            </section>
+        </article>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>关于本站</h3>
+                    <p>CPU架构学习平台致力于提供系统化、通俗易懂的处理器架构知识。</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>快速链接</h3>
+                    <ul class="footer-links">
+                        <li><a href="getting-started.html">新手指南</a></li>
+                        <li><a href="../CPU/CPU架构知识体系.html">知识地图</a></li>
+                        <li><a href="../articles/index.html">文章列表</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>学习资源</h3>
+                    <ul class="footer-links">
+                        <li><a href="../CPU/基础理论.html">基础理论</a></li>
+                        <li><a href="../CPU/虚拟内存.html">存储系统</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2026 CPU架构学习平台. 用心打造的技术学习社区.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../assets/js/main.js"></script>
+</body>
+</html>
