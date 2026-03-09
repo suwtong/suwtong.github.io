@@ -130,6 +130,50 @@
         .gallery img:hover {
             transform: scale(1.05);
         }
+
+        /* 文章列表样式 */
+        .article-list {
+            margin-top: 1.5rem;
+        }
+
+        .article-item {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 6px;
+            border-left: 3px solid var(--secondary-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .article-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .article-item h4 {
+            margin-bottom: 0.5rem;
+        }
+
+        .article-item h4 a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 1.1rem;
+        }
+
+        .article-item h4 a:hover {
+            color: var(--secondary-color);
+        }
+
+        .article-item p {
+            color: #666;
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+
+        .article-meta {
+            font-size: 0.85rem;
+            color: #999;
+        }
     </style>
 </head>
 <body>
@@ -150,12 +194,15 @@
                  alt="CPU架构解析" 
                  class="banner-image">
             <h2>CPU知识体系</h2>
-            <!-- <h3>处理器架构</h3>
-            <p>从x86到ARM，解析不同架构的设计哲学...</p>
-            <h3>性能优化</h3>
-            <p>缓存机制、流水线设计、超线程技术...</p>
-            <h3>最新动态</h3>
-            <p>量子计算对传统CPU的影响...</p> -->
+            
+            <h3>📚 文章列表</h3>
+            <div class="article-list">
+                <div class="article-item">
+                    <h4><a href="CPU/虚拟内存.html">虚拟内存：让程序以为自己拥有整个世界</a></h4>
+                    <p>深入浅出地讲解虚拟内存的原理、工作机制和实际应用。通过生动的比喻和图解，帮助你理解这个操作系统的核心技术。包含虚拟内存的概念、分页机制、页面置换算法、缺页中断等核心知识点。</p>
+                    <span class="article-meta">📅 2026-03-06 | ⏱️ 约15分钟 | 🏷️ 操作系统 内存管理</span>
+                </div>
+            </div>
         </section>
 
         <!-- GPU模块 -->
@@ -227,4 +274,3 @@
 </script>
 
 </html>
-

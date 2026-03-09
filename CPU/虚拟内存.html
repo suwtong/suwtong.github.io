@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>虚拟内存 - CPU知识体系</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --text-color: #34495e;
+            --bg-light: #ecf0f1;
+            --code-bg: #f8f9fa;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            line-height: 1.8;
+            color: var(--text-color);
+            background: var(--bg-light);
+        }
+
+        .navbar {
+            background: var(--primary-color);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: var(--secondary-color);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .article-header {
+            background: white;
+            padding: 3rem 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .article-header h1 {
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .article-meta {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        .content-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin: 2rem 0 1rem 0;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid var(--secondary-color);
+        }
+
+        h3 {
+            color: var(--secondary-color);
+            margin: 1.5rem 0 1rem 0;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            text-align: justify;
+        }
+
+        .highlight-box {
+            background: #e8f4f8;
+            border-left: 4px solid var(--secondary-color);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+
+        .highlight-box strong {
+            color: var(--secondary-color);
+        }
+
+        .diagram {
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .diagram svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .diagram-caption {
+            margin-top: 1rem;
+            color: #7f8c8d;
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .example-box {
+            background: #fff9e6;
+            border-left: 4px solid #f39c12;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+
+        .example-box h4 {
+            color: #f39c12;
+            margin-bottom: 0.5rem;
+        }
+
+        ul, ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .article-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .container {
+                padding: 0 0.5rem;
+            }
+            
+            .content-section {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <ul class="nav-links">
+            <li><a href="../index.html">返回首页</a></li>
+            <li><a href="#what">什么是虚拟内存</a></li>
+            <li><a href="#why">为什么需要</a></li>
+            <li><a href="#how">如何工作</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="article-header">
+            <h1>虚拟内存：让程序以为自己拥有整个世界</h1>
+            <div class="article-meta">
+                发布时间：2026年3月6日 | 阅读时间：约15分钟
+            </div>
+        </div>
+
+        <div class="content-section">
+            <h2 id="what">一、什么是虚拟内存？</h2>
+            
+            <p>想象一下，你在图书馆学习，但你的书桌很小，只能放下几本书。而你今天需要查阅的资料有几十本。怎么办呢？</p>
+            
+            <p>聪明的做法是：<strong>把当前正在看的书放在桌上，其他书暂时放在书架上</strong>。需要用到哪本书时，再从书架上取下来，同时把暂时不用的书放回去。</p>
+            
+            <div class="highlight-box">
+                <strong>虚拟内存就是这个道理！</strong><br>
+                它让每个程序都以为自己拥有巨大的内存空间（书架），而实际上物理内存（书桌）可能很小。操作系统负责在物理内存和硬盘之间来回搬运数据。
+            </div>
+
+            <div class="diagram">
+                <svg viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+                    <!-- 虚拟内存空间 -->
+                    <rect x="50" y="50" width="200" height="300" fill="#e8f4f8" stroke="#3498db" stroke-width="2"/>
+                    <text x="150" y="30" text-anchor="middle" font-size="16" font-weight="bold" fill="#2c3e50">虚拟内存空间</text>
+                    <text x="150" y="380" text-anchor="middle" font-size="14" fill="#7f8c8d">(程序看到的)</text>
+                    
+                    <!-- 虚拟内存块 -->
+                    <rect x="70" y="70" width="160" height="40" fill="#3498db" opacity="0.3"/>
+                    <text x="150" y="95" text-anchor="middle" font-size="12">程序代码</text>
+                    
+                    <rect x="70" y="120" width="160" height="40" fill="#3498db" opacity="0.3"/>
+                    <text x="150" y="145" text-anchor="middle" font-size="12">数据区</text>
+                    
+                    <rect x="70" y="170" width="160" height="40" fill="#3498db" opacity="0.3"/>
+                    <text x="150" y="195" text-anchor="middle" font-size="12">堆</text>
+                    
+                    <rect x="70" y="220" width="160" height="40" fill="#3498db" opacity="0.3"/>
+                    <text x="150" y="245" text-anchor="middle" font-size="12">栈</text>
+                    
+                    <rect x="70" y="270" width="160" height="60" fill="#95a5a6" opacity="0.3"/>
+                    <text x="150" y="305" text-anchor="middle" font-size="12">未使用空间</text>
+
+                    <!-- 箭头 -->
+                    <path d="M 270 200 L 330 200" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <text x="300" y="190" text-anchor="middle" font-size="14" fill="#2c3e50">映射</text>
+
+                    <!-- 物理内存 -->
+                    <rect x="350" y="100" width="180" height="200" fill="#f8f9fa" stroke="#e74c3c" stroke-width="2"/>
+                    <text x="440" y="80" text-anchor="middle" font-size="16" font-weight="bold" fill="#2c3e50">物理内存</text>
+                    <text x="440" y="330" text-anchor="middle" font-size="14" fill="#7f8c8d">(实际的RAM)</text>
+                    
+                    <!-- 物理内存块 -->
+                    <rect x="370" y="120" width="140" height="35" fill="#e74c3c" opacity="0.4"/>
+                    <text x="440" y="142" text-anchor="middle" font-size="11">页面1</text>
+                    
+                    <rect x="370" y="165" width="140" height="35" fill="#e74c3c" opacity="0.4"/>
+                    <text x="440" y="187" text-anchor="middle" font-size="11">页面2</text>
+                    
+                    <rect x="370" y="210" width="140" height="35" fill="#e74c3c" opacity="0.4"/>
+                    <text x="440" y="232" text-anchor="middle" font-size="11">页面3</text>
+                    
+                    <rect x="370" y="255" width="140" height="35" fill="#95a5a6" opacity="0.3"/>
+                    <text x="440" y="277" text-anchor="middle" font-size="11">空闲</text>
+
+                    <!-- 箭头 -->
+                    <path d="M 550 200 L 610 200" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <text x="580" y="190" text-anchor="middle" font-size="14" fill="#2c3e50">换出</text>
+
+                    <!-- 硬盘 -->
+                    <rect x="630" y="150" width="120" height="100" fill="#ecf0f1" stroke="#95a5a6" stroke-width="2"/>
+                    <text x="690" y="130" text-anchor="middle" font-size="16" font-weight="bold" fill="#2c3e50">硬盘</text>
+                    <text x="690" y="280" text-anchor="middle" font-size="14" fill="#7f8c8d">(交换区)</text>
+                    
+                    <rect x="645" y="170" width="90" height="25" fill="#95a5a6" opacity="0.4"/>
+                    <text x="690" y="187" text-anchor="middle" font-size="11">页面A</text>
+                    
+                    <rect x="645" y="205" width="90" height="25" fill="#95a5a6" opacity="0.4"/>
+                    <text x="690" y="222" text-anchor="middle" font-size="11">页面B</text>
+
+                    <!-- 箭头定义 -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <polygon points="0 0, 10 3, 0 6" fill="#2c3e50"/>
+                        </marker>
+                    </defs>
+                </svg>
+                <div class="diagram-caption">图1：虚拟内存的基本原理 - 程序使用虚拟地址，操作系统负责映射到物理内存</div>
+            </div>
+
+            <h2 id="why">二、为什么需要虚拟内存？</h2>
+
+            <h3>1. 内存不够用</h3>
+            <p>假设你的电脑只有 8GB 内存，但你同时打开了浏览器（占用2GB）、IDE（占用3GB）、游戏（占用4GB）。加起来需要 9GB，超出了物理内存！</p>
+            
+            <div class="example-box">
+                <h4>💡 实际例子</h4>
+                <p>没有虚拟内存：系统会提示"内存不足"，无法启动游戏。</p>
+                <p>有虚拟内存：系统把暂时不用的数据（比如后台的浏览器标签页）暂存到硬盘，腾出空间给游戏使用。</p>
+            </div>
+
+            <h3>2. 程序隔离与安全</h3>
+            <p>每个程序都有自己独立的虚拟地址空间，就像每个人都有自己的房间。程序A无法直接访问程序B的内存，这样：</p>
+            <ul>
+                <li>防止程序之间互相干扰</li>
+                <li>一个程序崩溃不会影响其他程序</li>
+                <li>提高系统安全性</li>
+            </ul>
+
+            <div class="diagram">
+                <svg viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg">
+                    <!-- 程序A -->
+                    <rect x="50" y="50" width="150" height="200" fill="#e8f4f8" stroke="#3498db" stroke-width="2"/>
+                    <text x="125" y="30" text-anchor="middle" font-size="14" font-weight="bold">程序A的虚拟空间</text>
+                    <text x="125" y="150" text-anchor="middle" font-size="12">地址: 0x00000000</text>
+                    <text x="125" y="170" text-anchor="middle" font-size="12">到</text>
+                    <text x="125" y="190" text-anchor="middle" font-size="12">0xFFFFFFFF</text>
+
+                    <!-- 程序B -->
+                    <rect x="275" y="50" width="150" height="200" fill="#fff9e6" stroke="#f39c12" stroke-width="2"/>
+                    <text x="350" y="30" text-anchor="middle" font-size="14" font-weight="bold">程序B的虚拟空间</text>
+                    <text x="350" y="150" text-anchor="middle" font-size="12">地址: 0x00000000</text>
+                    <text x="350" y="170" text-anchor="middle" font-size="12">到</text>
+                    <text x="350" y="190" text-anchor="middle" font-size="12">0xFFFFFFFF</text>
+
+                    <!-- 物理内存 -->
+                    <rect x="500" y="50" width="150" height="200" fill="#f8f9fa" stroke="#e74c3c" stroke-width="2"/>
+                    <text x="575" y="30" text-anchor="middle" font-size="14" font-weight="bold">物理内存</text>
+                    
+                    <rect x="520" y="70" width="110" height="50" fill="#3498db" opacity="0.4"/>
+                    <text x="575" y="100" text-anchor="middle" font-size="11">程序A数据</text>
+                    
+                    <rect x="520" y="130" width="110" height="50" fill="#f39c12" opacity="0.4"/>
+                    <text x="575" y="160" text-anchor="middle" font-size="11">程序B数据</text>
+                    
+                    <rect x="520" y="190" width="110" height="50" fill="#95a5a6" opacity="0.3"/>
+                    <text x="575" y="220" text-anchor="middle" font-size="11">其他</text>
+
+                    <!-- 箭头 -->
+                    <path d="M 200 120 L 500 95" stroke="#3498db" stroke-width="2" stroke-dasharray="5,5"/>
+                    <path d="M 275 180 L 500 155" stroke="#f39c12" stroke-width="2" stroke-dasharray="5,5"/>
+                </svg>
+                <div class="diagram-caption">图2：每个程序都有独立的虚拟地址空间，映射到不同的物理内存区域</div>
+            </div>
+
+            <h3>3. 简化程序开发</h3>
+            <p>程序员不需要关心：</p>
+            <ul>
+                <li>物理内存有多大</li>
+                <li>其他程序占用了哪些内存</li>
+                <li>内存碎片问题</li>
+            </ul>
+            <p>只需要假设自己有一个巨大的、连续的内存空间即可。</p>
+
+            <h2 id="how">三、虚拟内存如何工作？</h2>
+
+            <h3>1. 分页机制</h3>
+            <p>虚拟内存和物理内存都被分成固定大小的块，称为"页"（Page），通常是 4KB。</p>
+
+            <div class="highlight-box">
+                <strong>关键概念：</strong><br>
+                • <strong>虚拟页</strong>：虚拟内存中的页<br>
+                • <strong>物理页</strong>：物理内存中的页（也叫页框 Page Frame）<br>
+                • <strong>页表</strong>：记录虚拟页到物理页的映射关系
+            </div>
+
+            <div class="diagram">
+                <svg viewBox="0 0 800 350" xmlns="http://www.w3.org/2000/svg">
+                    <!-- 虚拟地址 -->
+                    <text x="100" y="30" font-size="14" font-weight="bold">虚拟地址</text>
+                    <rect x="50" y="40" width="200" height="40" fill="#e8f4f8" stroke="#3498db" stroke-width="2"/>
+                    <text x="150" y="65" text-anchor="middle" font-size="12">0x00001234</text>
+                    
+                    <!-- 分解 -->
+                    <rect x="50" y="100" width="100" height="40" fill="#3498db" opacity="0.3" stroke="#3498db" stroke-width="1"/>
+                    <text x="100" y="125" text-anchor="middle" font-size="11">页号: 0x0001</text>
+                    
+                    <rect x="150" y="100" width="100" height="40" fill="#f39c12" opacity="0.3" stroke="#f39c12" stroke-width="1"/>
+                    <text x="200" y="125" text-anchor="middle" font-size="11">页内偏移: 0x234</text>
+
+                    <!-- 箭头到页表 -->
+                    <path d="M 100 140 L 300 200" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead2)"/>
+                    <text x="180" y="165" font-size="12" fill="#2c3e50">查找页表</text>
+
+                    <!-- 页表 -->
+                    <rect x="300" y="200" width="200" height="120" fill="#f8f9fa" stroke="#2c3e50" stroke-width="2"/>
+                    <text x="400" y="190" text-anchor="middle" font-size="14" font-weight="bold">页表</text>
+                    
+                    <rect x="320" y="220" width="80" height="25" fill="#e8f4f8"/>
+                    <text x="360" y="237" text-anchor="middle" font-size="11">虚拟页0</text>
+                    <rect x="400" y="220" width="80" height="25" fill="#f8f9fa"/>
+                    <text x="440" y="237" text-anchor="middle" font-size="11">→ 物理页5</text>
+                    
+                    <rect x="320" y="245" width="80" height="25" fill="#3498db" opacity="0.3"/>
+                    <text x="360" y="262" text-anchor="middle" font-size="11">虚拟页1</text>
+                    <rect x="400" y="245" width="80" height="25" fill="#e74c3c" opacity="0.3"/>
+                    <text x="440" y="262" text-anchor="middle" font-size="11">→ 物理页2</text>
+                    
+                    <rect x="320" y="270" width="80" height="25" fill="#e8f4f8"/>
+                    <text x="360" y="287" text-anchor="middle" font-size="11">虚拟页2</text>
+                    <rect x="400" y="270" width="80" height="25" fill="#f8f9fa"/>
+                    <text x="440" y="287" text-anchor="middle" font-size="11">→ 物理页7</text>
+                    
+                    <rect x="320" y="295" width="80" height="25" fill="#e8f4f8"/>
+                    <text x="360" y="312" text-anchor="middle" font-size="11">...</text>
+
+                    <!-- 箭头到物理地址 -->
+                    <path d="M 500 257 L 550 257" stroke="#2c3e50" stroke-width="2" marker-end="url(#arrowhead2)"/>
+                    <text x="525" y="250" text-anchor="middle" font-size="12" fill="#2c3e50">找到</text>
+
+                    <!-- 物理地址 -->
+                    <text x="650" y="210" font-size="14" font-weight="bold">物理地址</text>
+                    <rect x="550" y="220" width="200" height="40" fill="#ffe6e6" stroke="#e74c3c" stroke-width="2"/>
+                    <text x="650" y="245" text-anchor="middle" font-size="12">0x00002234</text>
+                    
+                    <rect x="550" y="280" width="100" height="40" fill="#e74c3c" opacity="0.3" stroke="#e74c3c" stroke-width="1"/>
+                    <text x="600" y="305" text-anchor="middle" font-size="11">物理页号: 2</text>
+                    
+                    <rect x="650" y="280" width="100" height="40" fill="#f39c12" opacity="0.3" stroke="#f39c12" stroke-width="1"/>
+                    <text x="700" y="305" text-anchor="middle" font-size="11">偏移: 0x234</text>
+
+                    <defs>
+                        <marker id="arrowhead2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                            <polygon points="0 0, 10 3, 0 6" fill="#2c3e50"/>
+                        </marker>
+                    </defs>
+                </svg>
+                <div class="diagram-caption">图3：地址转换过程 - 虚拟地址通过页表映射到物理地址</div>
+            </div>
+
+            <h3>2. 页面置换算法</h3>
+            <p>当物理内存满了，需要把某些页面换出到硬盘时，用什么策略选择？</p>
+
+            <div class="example-box">
+                <h4>🎯 常见算法</h4>
+                <p><strong>LRU（最近最少使用）</strong>：把最久没用过的页面换出去</p>
+                <p>就像整理书桌，把最久没翻过的书放回书架。</p>
+                <br>
+                <p><strong>FIFO（先进先出）</strong>：把最早加载的页面换出去</p>
+                <p>简单但不够智能，可能把常用的页面换出去。</p>
+            </div>
+
+            <h3>3. 缺页中断（Page Fault）</h3>
+            <p>当程序访问的页面不在物理内存中时，会发生缺页中断：</p>
+            <ol>
+                <li>CPU 发现页面不在内存中</li>
+                <li>触发缺页中断，暂停程序执行</li>
+                <li>操作系统从硬盘加载需要的页面</li>
+                <li>如果内存满了，先换出一个页面</li>
+                <li>更新页表</li>
+                <li>恢复程序执行</li>
+            </ol>
+
+            <div class="highlight-box">
+                <strong>⚠️ 性能影响</strong><br>
+                缺页中断需要访问硬盘，速度比访问内存慢 <strong>10万倍</strong>！<br>
+                所以频繁的缺页中断会严重影响性能，这种现象叫做"抖动"（Thrashing）。
+            </div>
+
+            <h2>四、虚拟内存的优缺点</h2>
+
+            <h3>✅ 优点</h3>
+            <ul>
+                <li><strong>扩展内存容量</strong>：可以运行比物理内存大的程序</li>
+                <li><strong>程序隔离</strong>：提高安全性和稳定性</li>
+                <li><strong>简化编程</strong>：程序员不需要管理物理内存</li>
+                <li><strong>内存共享</strong>：多个程序可以共享同一份代码（如系统库）</li>
+            </ul>
+
+            <h3>❌ 缺点</h3>
+            <ul>
+                <li><strong>性能开销</strong>：地址转换需要时间</li>
+                <li><strong>缺页中断慢</strong>：访问硬盘比内存慢很多</li>
+                <li><strong>复杂性</strong>：操作系统实现复杂</li>
+            </ul>
+
+            <h2>五、实际应用场景</h2>
+
+            <div class="example-box">
+                <h4>🎮 场景1：玩大型游戏</h4>
+                <p>游戏需要 8GB 内存，但你的电脑只有 4GB 物理内存。虚拟内存让游戏可以运行，但可能会卡顿（因为频繁换页）。</p>
+                <p><strong>解决方案</strong>：增加物理内存，减少虚拟内存的使用。</p>
+            </div>
+
+            <div class="example-box">
+                <h4>💻 场景2：开发大型项目</h4>
+                <p>IDE、编译器、浏览器同时运行，总共需要 16GB 内存。虚拟内存让这些程序可以同时运行，操作系统智能地管理内存分配。</p>
+            </div>
+
+            <div class="example-box">
+                <h4>🖥️ 场景3：服务器运行多个服务</h4>
+                <p>Web服务器、数据库、缓存服务同时运行。虚拟内存提供隔离，一个服务崩溃不会影响其他服务。</p>
+            </div>
+
+            <h2>六、如何优化虚拟内存使用？</h2>
+
+            <h3>1. 增加物理内存</h3>
+            <p>这是最直接有效的方法。物理内存越大，需要换页的次数越少。</p>
+
+            <h3>2. 优化程序设计</h3>
+            <ul>
+                <li>减少内存占用</li>
+                <li>提高数据局部性（访问相邻的数据）</li>
+                <li>及时释放不用的内存</li>
+            </ul>
+
+            <h3>3. 调整虚拟内存设置</h3>
+            <div class="code-block">
+Windows: 控制面板 → 系统 → 高级系统设置 → 性能设置 → 高级 → 虚拟内存
+
+建议设置：
+- 初始大小：物理内存的 1.5 倍
+- 最大大小：物理内存的 3 倍
+            </div>
+
+            <h2>七、总结</h2>
+
+            <div class="highlight-box">
+                <strong>核心要点：</strong><br>
+                1️⃣ 虚拟内存让程序以为自己有巨大的内存空间<br>
+                2️⃣ 操作系统通过页表管理虚拟地址到物理地址的映射<br>
+                3️⃣ 当物理内存不够时，暂时不用的数据会被换出到硬盘<br>
+                4️⃣ 虚拟内存提供了内存扩展、程序隔离等重要功能<br>
+                5️⃣ 但频繁的页面置换会影响性能
+            </div>
+
+            <p>虚拟内存是现代操作系统的核心技术之一，它让我们可以在有限的物理内存上运行更多、更大的程序。理解虚拟内存的工作原理，有助于我们写出更高效的程序，也能更好地诊断和解决内存相关的问题。</p>
+
+            <div style="text-align: center; margin-top: 3rem; padding: 2rem; background: var(--bg-light); border-radius: 8px;">
+                <p style="font-size: 1.1rem; color: var(--primary-color);">
+                    <strong>希望这篇文章帮助你理解了虚拟内存！</strong><br>
+                    如有疑问，欢迎讨论交流。
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
