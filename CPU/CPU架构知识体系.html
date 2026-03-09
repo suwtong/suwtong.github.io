@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPU架构知识体系 - 技术笔记</title>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            line-height: 1.8;
+            color: #333;
+            background: #f5f5f5;
+        }
+
+        .navbar {
+            background: #fff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .nav-container a {
+            color: #666;
+            text-decoration: none;
+            font-size: 0.95rem;
+        }
+
+        .nav-container a:hover {
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 2rem 4rem;
+        }
+
+        .article {
+            background: #fff;
+            border-radius: 8px;
+            padding: 3rem;
+            border: 1px solid #e0e0e0;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid #333;
+        }
+
+        .meta {
+            color: #999;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            margin: 2.5rem 0 1rem;
+            padding-left: 0.5rem;
+            border-left: 4px solid #333;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #444;
+            margin: 2rem 0 1rem;
+        }
+
+        h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #555;
+            margin: 1.5rem 0 0.8rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+            color: #555;
+        }
+
+        ul, ol {
+            margin: 1rem 0 1rem 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: #555;
+        }
+
+        code {
+            background: #f5f5f5;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            color: #d63384;
+        }
+
+        .note {
+            background: #f8f9fa;
+            border-left: 4px solid #666;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 4px;
+        }
+
+        .note p {
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem 2rem;
+            }
+
+            .article {
+                padding: 2rem 1.5rem;
+            }
+
+            h1 {
+                font-size: 1.6rem;
+            }
+
+            h2 {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="../index.html">← 返回首页</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <article class="article">
+            <h1>CPU架构知识体系</h1>
+            <div class="meta">2026-03-09 · 知识大纲</div>
+
+            <p>作为CPU硬件架构工作者，需要掌握从底层硬件到上层软件的完整知识体系。本文梳理了CPU架构设计中的核心知识点，为深入学习提供系统化的框架。</p>
+
+            <h2>一、基础理论</h2>
+
+            <h3>1.1 计算机体系结构基础</h3>
+            <ul>
+                <li><strong>冯·诺依曼架构</strong>：存储程序概念、统一存储、顺序执行</li>
+                <li><strong>哈佛架构</strong>：指令存储与数据存储分离</li>
+                <li><strong>改进型哈佛架构</strong>：现代处理器的实际架构</li>
+                <li><strong>RISC vs CISC</strong>：精简指令集与复杂指令集的设计哲学</li>
+                <li><strong>指令集架构(ISA)</strong>：x86、ARM、RISC-V等主流架构特点</li>
+            </ul>
+
+            <h3>1.2 数字逻辑基础</h3>
+            <ul>
+                <li><strong>组合逻辑</strong>：加法器、多路选择器、译码器</li>
+                <li><strong>时序逻辑</strong>：触发器、寄存器、状态机</li>
+                <li><strong>时钟与时序</strong>：建立时间、保持时间、时钟偏斜</li>
+                <li><strong>关键路径分析</strong>：时序优化的基础</li>
+            </ul>
+
+            <h2>二、CPU微架构核心组件</h2>
+
+            <h3>2.1 流水线设计</h3>
+            <ul>
+                <li><strong>经典五级流水线</strong>：取指(IF)、译码(ID)、执行(EX)、访存(MEM)、写回(WB)</li>
+                <li><strong>超标量流水线</strong>：多发射、乱序执行</li>
+                <li><strong>流水线冒险</strong>：
+                    <ul>
+                        <li>结构冒险：资源冲突</li>
+                        <li>数据冒险：RAW、WAR、WAW</li>
+                        <li>控制冒险：分支预测失败</li>
+                    </ul>
+                </li>
+                <li><strong>流水线停顿与转发</strong>：数据前递、气泡插入</li>
+            </ul>
+
+            <h3>2.2 分支预测</h3>
+            <ul>
+                <li><strong>静态预测</strong>：总是预测跳转/不跳转</li>
+                <li><strong>动态预测</strong>：
+                    <ul>
+                        <li>1位/2位饱和计数器</li>
+                        <li>局部历史预测器</li>
+                        <li>全局历史预测器</li>
+                        <li>混合预测器(Tournament Predictor)</li>
+                    </ul>
+                </li>
+                <li><strong>分支目标缓冲(BTB)</strong>：快速获取跳转目标</li>
+                <li><strong>返回地址栈(RAS)</strong>：函数调用优化</li>
+            </ul>
+
+            <h3>2.3 乱序执行</h3>
+            <ul>
+                <li><strong>指令重命名</strong>：消除WAR和WAW冒险</li>
+                <li><strong>保留站(Reservation Station)</strong>：Tomasulo算法</li>
+                <li><strong>重排序缓冲(ROB)</strong>：保证精确异常</li>
+                <li><strong>发射队列</strong>：指令调度策略</li>
+                <li><strong>提交阶段</strong>：按序提交保证正确性</li>
+            </ul>
+
+            <h3>2.4 执行单元</h3>
+            <ul>
+                <li><strong>算术逻辑单元(ALU)</strong>：整数运算</li>
+                <li><strong>浮点运算单元(FPU)</strong>：IEEE 754标准</li>
+                <li><strong>向量处理单元</strong>：SIMD指令支持</li>
+                <li><strong>加载存储单元(LSU)</strong>：内存访问</li>
+                <li><strong>乘法器与除法器</strong>：高性能实现</li>
+            </ul>
+
+            <h2>三、存储层次结构</h2>
+
+            <h3>3.1 寄存器文件</h3>
+            <ul>
+                <li><strong>通用寄存器</strong>：数据暂存</li>
+                <li><strong>特殊寄存器</strong>：PC、SP、状态寄存器</li>
+                <li><strong>物理寄存器与逻辑寄存器</strong>：寄存器重命名</li>
+                <li><strong>寄存器文件设计</strong>：读写端口、面积功耗权衡</li>
+            </ul>
+
+            <h3>3.2 Cache设计</h3>
+            <ul>
+                <li><strong>Cache组织</strong>：直接映射、组相联、全相联</li>
+                <li><strong>替换策略</strong>：LRU、FIFO、随机替换</li>
+                <li><strong>写策略</strong>：写回(Write-back)、写通(Write-through)</li>
+                <li><strong>多级Cache</strong>：L1/L2/L3的层次设计</li>
+                <li><strong>Cache一致性</strong>：MESI、MOESI协议</li>
+                <li><strong>预取技术</strong>：硬件预取器设计</li>
+            </ul>
+
+            <h3>3.3 虚拟内存</h3>
+            <ul>
+                <li><strong>地址转换</strong>：虚拟地址到物理地址</li>
+                <li><strong>页表结构</strong>：单级、多级、倒排页表</li>
+                <li><strong>TLB设计</strong>：快速地址转换</li>
+                <li><strong>页面置换算法</strong>：LRU、Clock算法</li>
+                <li><strong>大页支持</strong>：2MB/1GB页面</li>
+            </ul>
+
+            <h2>四、多核与并行</h2>
+
+            <h3>4.1 多核架构</h3>
+            <ul>
+                <li><strong>对称多处理(SMP)</strong>：核心对等</li>
+                <li><strong>非对称多处理(AMP)</strong>：大小核设计</li>
+                <li><strong>核间互连</strong>：总线、交叉开关、片上网络(NoC)</li>
+                <li><strong>核间通信</strong>：共享内存、消息传递</li>
+            </ul>
+
+            <h3>4.2 内存一致性</h3>
+            <ul>
+                <li><strong>顺序一致性(SC)</strong>：最严格的模型</li>
+                <li><strong>全存储排序(TSO)</strong>：x86采用</li>
+                <li><strong>弱一致性模型</strong>：ARM的弱序模型</li>
+                <li><strong>内存屏障</strong>：保证顺序的指令</li>
+            </ul>
+
+            <h3>4.3 同步原语</h3>
+            <ul>
+                <li><strong>原子操作</strong>：CAS、LL/SC</li>
+                <li><strong>锁实现</strong>：自旋锁、互斥锁</li>
+                <li><strong>无锁数据结构</strong>：Lock-free编程</li>
+            </ul>
+
+            <h2>五、功耗与性能优化</h2>
+
+            <h3>5.1 功耗管理</h3>
+            <ul>
+                <li><strong>动态功耗</strong>：P = α × C × V² × f</li>
+                <li><strong>静态功耗</strong>：漏电流管理</li>
+                <li><strong>动态电压频率调节(DVFS)</strong>：性能功耗平衡</li>
+                <li><strong>时钟门控</strong>：降低动态功耗</li>
+                <li><strong>电源门控</strong>：降低静态功耗</li>
+                <li><strong>睡眠状态</strong>：C-states管理</li>
+            </ul>
+
+            <h3>5.2 性能优化技术</h3>
+            <ul>
+                <li><strong>指令级并行(ILP)</strong>：最大化单线程性能</li>
+                <li><strong>线程级并行(TLP)</strong>：多核并行</li>
+                <li><strong>数据级并行(DLP)</strong>：SIMD向量化</li>
+                <li><strong>任务级并行</strong>：异构计算</li>
+            </ul>
+
+            <h3>5.3 性能分析</h3>
+            <ul>
+                <li><strong>性能计数器</strong>：PMU使用</li>
+                <li><strong>CPI分析</strong>：找出性能瓶颈</li>
+                <li><strong>带宽分析</strong>：内存墙问题</li>
+                <li><strong>Amdahl定律</strong>：并行加速比上限</li>
+            </ul>
+
+            <h2>六、专用加速器</h2>
+
+            <h3>6.1 向量处理</h3>
+            <ul>
+                <li><strong>SIMD扩展</strong>：SSE、AVX、NEON</li>
+                <li><strong>向量长度</strong>：固定长度vs可变长度</li>
+                <li><strong>向量掩码</strong>：条件执行</li>
+            </ul>
+
+            <h3>6.2 AI加速器</h3>
+            <ul>
+                <li><strong>矩阵乘法单元</strong>：Tensor Core</li>
+                <li><strong>神经网络加速</strong>：NPU设计</li>
+                <li><strong>量化支持</strong>：INT8/INT4推理</li>
+            </ul>
+
+            <h3>6.3 其他加速器</h3>
+            <ul>
+                <li><strong>加密加速</strong>：AES-NI</li>
+                <li><strong>压缩加速</strong>：硬件压缩引擎</li>
+                <li><strong>图形加速</strong>：GPU集成</li>
+            </ul>
+
+            <h2>七、安全特性</h2>
+
+            <h3>7.1 硬件安全</h3>
+            <ul>
+                <li><strong>特权级别</strong>：Ring 0-3、EL0-3</li>
+                <li><strong>内存保护</strong>：MMU权限控制</li>
+                <li><strong>可信执行环境(TEE)</strong>：TrustZone、SGX</li>
+                <li><strong>安全启动</strong>：Secure Boot</li>
+            </ul>
+
+            <h3>7.2 侧信道攻击防护</h3>
+            <ul>
+                <li><strong>Spectre/Meltdown</strong>：推测执行漏洞</li>
+                <li><strong>缓解措施</strong>：IBRS、STIBP、retpoline</li>
+                <li><strong>Cache时序攻击</strong>：防护机制</li>
+            </ul>
+
+            <h2>八、验证与测试</h2>
+
+            <h3>8.1 功能验证</h3>
+            <ul>
+                <li><strong>仿真验证</strong>：RTL仿真</li>
+                <li><strong>形式化验证</strong>：数学证明正确性</li>
+                <li><strong>覆盖率分析</strong>：代码覆盖、功能覆盖</li>
+                <li><strong>随机测试</strong>：约束随机验证</li>
+            </ul>
+
+            <h3>8.2 性能验证</h3>
+            <ul>
+                <li><strong>基准测试</strong>：SPEC、CoreMark</li>
+                <li><strong>功耗测试</strong>：动态功耗分析</li>
+                <li><strong>时序分析</strong>：静态时序分析(STA)</li>
+            </ul>
+
+            <h2>九、工具与方法论</h2>
+
+            <h3>9.1 设计工具</h3>
+            <ul>
+                <li><strong>HDL语言</strong>：Verilog、VHDL、SystemVerilog</li>
+                <li><strong>高层次综合</strong>：HLS工具</li>
+                <li><strong>EDA工具链</strong>：综合、布局布线</li>
+            </ul>
+
+            <h3>9.2 性能建模</h3>
+            <ul>
+                <li><strong>周期精确模型</strong>：Cycle-accurate simulation</li>
+                <li><strong>性能模拟器</strong>：gem5、Sniper</li>
+                <li><strong>分析模型</strong>：排队论、马尔可夫链</li>
+            </ul>
+
+            <h2>十、前沿技术</h2>
+
+            <h3>10.1 新兴架构</h3>
+            <ul>
+                <li><strong>近数据处理</strong>：Processing-in-Memory</li>
+                <li><strong>神经形态计算</strong>：类脑芯片</li>
+                <li><strong>量子计算</strong>：量子处理器</li>
+                <li><strong>光子计算</strong>：光互连</li>
+            </ul>
+
+            <h3>10.2 先进工艺</h3>
+            <ul>
+                <li><strong>3D堆叠</strong>：TSV技术</li>
+                <li><strong>Chiplet</strong>：小芯片互连</li>
+                <li><strong>先进封装</strong>：2.5D、3D封装</li>
+                <li><strong>新材料</strong>：碳纳米管、石墨烯</li>
+            </ul>
+
+            <div class="note">
+                <p><strong>学习建议：</strong>CPU架构是一个庞大的知识体系，建议从基础理论开始，逐步深入到微架构设计。实践是最好的老师，可以通过阅读开源处理器代码（如RISC-V实现）、使用模拟器进行实验来加深理解。同时关注最新的学术论文和工业界动态，了解前沿技术发展。</p>
+            </div>
+
+            <h2>参考资源</h2>
+            <ul>
+                <li>《计算机体系结构：量化研究方法》- Hennessy & Patterson</li>
+                <li>《超标量处理器设计》- Mike Johnson</li>
+                <li>《现代处理器设计：超标量处理器基础》</li>
+                <li>Intel、AMD、ARM官方架构手册</li>
+                <li>RISC-V规范文档</li>
+                <li>顶级会议论文：ISCA、MICRO、HPCA</li>
+            </ul>
+        </article>
+    </div>
+</body>
+</html>
