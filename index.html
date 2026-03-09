@@ -3,274 +3,744 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>suweitong 个人博客</title>
+    <title>苏伟桐的技术博客 | 探索计算机世界</title>
+    <meta name="description" content="专注于CPU、GPU架构研究与电影评论的个人技术博客">
+    
+    <!-- 引入Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
     <style>
         :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --text-color: #34495e;
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --dark-bg: #0f0f23;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-primary: #1a1a2e;
+            --text-secondary: #6b7280;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+            --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.16);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
         }
 
         body {
-            line-height: 1.6;
-            color: var(--text-color);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.7;
+            color: var(--text-primary);
+            background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+            overflow-x: hidden;
         }
 
-        /* 导航栏样式 */
+        /* 背景装饰 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.05) 0%, transparent 70%);
+            animation: rotate 60s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* 导航栏 */
         .navbar {
-            background: var(--primary-color);
-            padding: 1rem;
             position: sticky;
             top: 0;
             z-index: 1000;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            padding: 0.75rem 0;
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
         }
 
         .nav-links {
             display: flex;
-            justify-content: center;
             gap: 2rem;
             list-style: none;
         }
 
         .nav-links a {
-            color: white;
+            color: var(--text-primary);
             text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
             padding: 0.5rem 1rem;
-            border-radius: 4px;
-            transition: background 0.3s;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background: var(--primary-gradient);
+            transition: width 0.3s ease;
         }
 
         .nav-links a:hover {
-            background: var(--secondary-color);
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
         }
 
-        /* 主体内容容器 */
+        .nav-links a:hover::after {
+            width: 60%;
+        }
+
+        /* Hero区域 */
+        .hero {
+            position: relative;
+            max-width: 1200px;
+            margin: 4rem auto 3rem;
+            padding: 0 2rem;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -2px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            line-height: 1.8;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* 主体内容 */
         .container {
             max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1rem;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+            position: relative;
+            z-index: 1;
         }
 
-        /* 模块卡片样式 */
+        /* 模块卡片 */
         .module-card {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            padding: 2rem;
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border-color);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .module-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.6s ease;
+        }
+
+        .module-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .module-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .module-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
             margin-bottom: 2rem;
-            border-left: 4px solid var(--secondary-color);
+        }
+
+        .module-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            background: var(--primary-gradient);
+            box-shadow: var(--shadow-md);
+        }
+
+        .module-card h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
         }
 
         .banner-image {
             width: 100%;
-            max-height: 300px;
+            height: 320px;
             object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg);
+            transition: transform 0.4s ease;
         }
+
+        .banner-image:hover {
+            transform: scale(1.02);
+        }
+
+        /* 文章列表 */
+        .article-list {
+            margin-top: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .article-item {
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .article-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--primary-gradient);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .article-item:hover {
+            transform: translateX(8px);
+            box-shadow: var(--shadow-md);
+            border-color: rgba(102, 126, 234, 0.2);
+        }
+
+        .article-item:hover::before {
+            transform: scaleY(1);
+        }
+
+        .article-item h4 {
+            margin-bottom: 1rem;
+        }
+
+        .article-item h4 a {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 1.25rem;
+            font-weight: 600;
+            transition: color 0.3s ease;
+            display: inline-block;
+        }
+
+        .article-item h4 a:hover {
+            color: #667eea;
+        }
+
+        .article-item p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .article-meta {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* 内容网格 */
         .content-grid {
             display: grid;
             grid-template-columns: 1fr 2fr;
-            gap: 2rem;
+            gap: 2.5rem;
             align-items: center;
-            margin: 1.5rem 0;
+            margin: 2rem 0;
         }
 
         .content-image {
             width: 100%;
-            border: 3px solid #eee;
-            padding: 5px;
-            background: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow-md);
+            transition: transform 0.4s ease;
         }
 
-        @media (max-width: 768px) {
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
+        .content-image:hover {
+            transform: scale(1.05) rotate(2deg);
         }
 
-        h1, h2 {
-            color: var(--primary-color);
+        .text-content h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
             margin-bottom: 1rem;
         }
 
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .nav-links {
-                flex-direction: column;
-                text-align: center;
-                gap: 1rem;
-            }
+        .text-content p {
+            color: var(--text-secondary);
+            line-height: 1.8;
         }
 
+        /* 图片画廊 */
         .gallery {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
         }
 
-        .gallery img {
+        .gallery-item {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            aspect-ratio: 16/10;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: all 0.4s ease;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .gallery-item img {
             width: 100%;
-            height: 180px;
+            height: 100%;
             object-fit: cover;
-            cursor: zoom-in;
-            transition: transform 0.3s;
-            border-radius: 4px;
+            transition: transform 0.6s ease;
         }
 
-        .gallery img:hover {
-            transform: scale(1.05);
+        .gallery-item:hover img {
+            transform: scale(1.1);
         }
 
-        /* 文章列表样式 */
-        .article-list {
-            margin-top: 1.5rem;
-        }
-
-        .article-item {
-            background: #f8f9fa;
+        .gallery-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
             padding: 1.5rem;
-            margin-bottom: 1rem;
-            border-radius: 6px;
-            border-left: 3px solid var(--secondary-color);
-            transition: transform 0.2s, box-shadow 0.2s;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            color: white;
+            transform: translateY(100%);
+            transition: transform 0.4s ease;
         }
 
-        .article-item:hover {
-            transform: translateX(5px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        .gallery-item:hover .gallery-overlay {
+            transform: translateY(0);
         }
 
-        .article-item h4 {
-            margin-bottom: 0.5rem;
-        }
-
-        .article-item h4 a {
-            color: var(--primary-color);
-            text-decoration: none;
-            font-size: 1.1rem;
-        }
-
-        .article-item h4 a:hover {
-            color: var(--secondary-color);
-        }
-
-        .article-item p {
-            color: #666;
-            margin-bottom: 0.5rem;
-            line-height: 1.6;
-        }
-
-        .article-meta {
-            font-size: 0.85rem;
-            color: #999;
-        }
-    </style>
-</head>
-<body>
-    <!-- 导航栏 -->
-    <nav class="navbar">
-        <ul class="nav-links">
-            <li><a href="#cpu">CPU知识体系</a></li>
-            <li><a href="#gpu">GPU知识体系</a></li>
-            <li><a href="#reviews">个人影评</a></li>
-        </ul>
-    </nav>
-
-    <!-- 主体内容 -->
-    <div class="container">
-        <!-- CPU模块 -->
-        <section id="cpu" class="module-card">
-            <img src="CPU/label.png" 
-                 alt="CPU架构解析" 
-                 class="banner-image">
-            <h2>CPU知识体系</h2>
-            
-            <h3>📚 文章列表</h3>
-            <div class="article-list">
-                <div class="article-item">
-                    <h4><a href="CPU/虚拟内存.html">虚拟内存：让程序以为自己拥有整个世界</a></h4>
-                    <p>深入浅出地讲解虚拟内存的原理、工作机制和实际应用。通过生动的比喻和图解，帮助你理解这个操作系统的核心技术。包含虚拟内存的概念、分页机制、页面置换算法、缺页中断等核心知识点。</p>
-                    <span class="article-meta">📅 2026-03-06 | ⏱️ 约15分钟 | 🏷️ 操作系统 内存管理</span>
-                </div>
-            </div>
-        </section>
-
-        <!-- GPU模块 -->
-        <section id="gpu" class="module-card">
-            <h2>GPU知识体系</h2>
-            <div class="content-grid">
-                <img src="GPU/label.png" 
-                     alt="GPU架构图"
-                     class="content-image">
-                <div class="text-content">
-                    <h3>图形流水线</h3>
-                    <p>现代GPU的并行计算架构示意图...</p>
-                </div>
-            </div>
-            <!-- <h3>图形流水线</h3>
-            <p>顶点着色器、光栅化、像素着色器...</p>
-            <h3>并行计算</h3>
-            <p>CUDA核心、SIMT架构、显存管理...</p>
-            <h3>行业应用</h3>
-            <p>深度学习中的GPU加速原理...</p> -->
-        </section>
-
-        <!-- 影评模块 -->
-        <section id="reviews" class="module-card">
-            <h2>电影评论</h2>
-            <div class="gallery">
-                <!-- 影评相关图片 -->
-                <img src="CPU/label.png" alt="沙丘剧照" onclick="openLightbox(this)">
-                <img src="GPU/label.png" alt="新海诚作品" onclick="openLightbox(this)">
-                <img src="影评/label.png" alt="电影胶片" onclick="openLightbox(this)">
-            </div>
-            <!-- <div class="review">
-                <h3>《沙丘》观影笔记</h3>
-                <p>维伦纽瓦的视觉美学在IMAX银幕上的震撼呈现...</p>
-            </div>
-            <div class="review">
-                <h3>动画电影分析</h3>
-                <p>新海诚作品中的时空叙事结构研究...</p>
-            </div> -->
-        </section>
-    </div>
-</body>
-
-<script>
-    // 简易灯箱效果
-    function openLightbox(img) {
-        const overlay = document.createElement('div');
-        overlay.style = `
+        /* 灯箱效果 */
+        .lightbox {
             position: fixed;
-            top:0; left:0;
-            width:100vw; height:100vh;
-            background: rgba(0,0,0,0.8);
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 9999;
             cursor: zoom-out;
-        `;
-        overlay.onclick = () => overlay.remove();
-        
-        const largeImg = new Image();
-        largeImg.src = img.src;
-        largeImg.style.maxWidth = '80vw';
-        largeImg.style.maxHeight = '80vh';
-        
-        overlay.appendChild(largeImg);
-        document.body.appendChild(overlay);
-    }
-</script>
+            animation: fadeIn 0.3s ease;
+        }
 
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .lightbox img {
+            max-width: 90vw;
+            max-height: 90vh;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: zoomIn 0.3s ease;
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.1rem;
+            }
+
+            .hero-stats {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .module-card {
+                padding: 2rem 1.5rem;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .gallery {
+                grid-template-columns: 1fr;
+            }
+
+            .article-meta {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #667eea, #764ba2);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #764ba2, #667eea);
+        }
+
+        /* 加载动画 */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading {
+            animation: pulse 2s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <div class="logo">苏伟桐的博客</div>
+            <ul class="nav-links">
+                <li><a href="#cpu">💻 CPU架构</a></li>
+                <li><a href="#gpu">🎮 GPU技术</a></li>
+                <li><a href="#reviews">🎬 影评专栏</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero区域 -->
+    <section class="hero">
+        <h1>探索计算机的奥秘</h1>
+        <p>深入CPU与GPU架构，分享技术见解与电影评论。在这里，硬件与艺术交织，理性与感性碰撞。</p>
+        
+        <div class="hero-stats">
+            <div class="stat-item">
+                <span class="stat-number">3</span>
+                <span class="stat-label">技术专栏</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">1+</span>
+                <span class="stat-label">原创文章</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">∞</span>
+                <span class="stat-label">持续更新</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 主体内容 -->
+    <div class="container">
+        <!-- CPU模块 -->
+        <section id="cpu" class="module-card">
+            <div class="module-header">
+                <div class="module-icon">💻</div>
+                <h2>CPU知识体系</h2>
+            </div>
+            
+            <img src="CPU/label.png" 
+                 alt="CPU架构解析" 
+                 class="banner-image"
+                 loading="lazy">
+            
+            <h3 class="section-title">📚 精选文章</h3>
+            <div class="article-list">
+                <article class="article-item">
+                    <h4><a href="CPU/虚拟内存.html">虚拟内存：让程序以为自己拥有整个世界</a></h4>
+                    <p>深入浅出地讲解虚拟内存的原理、工作机制和实际应用。通过生动的比喻和图解，帮助你理解这个操作系统的核心技术。包含虚拟内存的概念、分页机制、页面置换算法、缺页中断等核心知识点。</p>
+                    <div class="article-meta">
+                        <span class="meta-item">📅 2026-03-06</span>
+                        <span class="meta-item">⏱️ 约15分钟</span>
+                        <span class="meta-item">🏷️ 操作系统</span>
+                        <span class="meta-item">🏷️ 内存管理</span>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- GPU模块 -->
+        <section id="gpu" class="module-card">
+            <div class="module-header">
+                <div class="module-icon">🎮</div>
+                <h2>GPU知识体系</h2>
+            </div>
+            
+            <div class="content-grid">
+                <img src="GPU/label.png" 
+                     alt="GPU架构图"
+                     class="content-image"
+                     loading="lazy">
+                <div class="text-content">
+                    <h3>图形流水线与并行计算</h3>
+                    <p>现代GPU采用高度并行的架构设计，通过数千个计算核心同时处理图形渲染和通用计算任务。从顶点着色器到像素着色器，每个阶段都经过精心优化，为游戏和AI应用提供强大的计算能力。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 影评模块 -->
+        <section id="reviews" class="module-card">
+            <div class="module-header">
+                <div class="module-icon">🎬</div>
+                <h2>电影评论</h2>
+            </div>
+            
+            <div class="gallery">
+                <div class="gallery-item" onclick="openLightbox(this.querySelector('img'))">
+                    <img src="CPU/label.png" alt="经典电影剧照" loading="lazy">
+                    <div class="gallery-overlay">
+                        <h4>技术与艺术的交融</h4>
+                    </div>
+                </div>
+                <div class="gallery-item" onclick="openLightbox(this.querySelector('img'))">
+                    <img src="GPU/label.png" alt="动画电影场景" loading="lazy">
+                    <div class="gallery-overlay">
+                        <h4>视觉叙事的魅力</h4>
+                    </div>
+                </div>
+                <div class="gallery-item" onclick="openLightbox(this.querySelector('img'))">
+                    <img src="影评/label.png" alt="电影胶片" loading="lazy">
+                    <div class="gallery-overlay">
+                        <h4>光影中的故事</h4>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // 导航栏滚动效果
+        let lastScroll = 0;
+        const navbar = document.getElementById('navbar');
+        
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            
+            if (currentScroll > 100) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+            
+            lastScroll = currentScroll;
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 灯箱效果
+        function openLightbox(img) {
+            const lightbox = document.createElement('div');
+            lightbox.className = 'lightbox';
+            lightbox.onclick = () => lightbox.remove();
+            
+            const largeImg = new Image();
+            largeImg.src = img.src;
+            largeImg.alt = img.alt;
+            
+            lightbox.appendChild(largeImg);
+            document.body.appendChild(lightbox);
+            
+            // 防止背景滚动
+            document.body.style.overflow = 'hidden';
+            lightbox.addEventListener('click', () => {
+                document.body.style.overflow = '';
+            });
+        }
+
+        // 图片懒加载优化
+        if ('IntersectionObserver' in window) {
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.src = img.dataset.src || img.src;
+                        img.classList.remove('loading');
+                        observer.unobserve(img);
+                    }
+                });
+            });
+
+            document.querySelectorAll('img[loading="lazy"]').forEach(img => {
+                imageObserver.observe(img);
+            });
+        }
+
+        // 添加页面加载动画
+        window.addEventListener('load', () => {
+            document.querySelectorAll('.module-card').forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(30px)';
+                    card.style.transition = 'all 0.6s ease';
+                    
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 50);
+                }, index * 150);
+            });
+        });
+    </script>
+</body>
 </html>
