@@ -24,4 +24,4 @@ GPGPU 架构工程师，专注于 AI 方向的硬件加速器设计。
 
 ### 联系方式
 
-- Email: 1329610561@qq.com
+- Email:suweitong_pvt@qq.com
