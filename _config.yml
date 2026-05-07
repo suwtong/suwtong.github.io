@@ -1,0 +1,52 @@
+# Site settings
+title: "Suwtong"
+description: "GPGPU Architecture Engineer | AI Hardware"
+url: "https://suwtong.github.io"
+baseurl: ""
+
+# Author
+author:
+  name: "suwtong"
+  email: "1329610561@qq.com"
+  bio: "GPGPU Architecture Engineer | AI Hardware"
+
+# Build settings
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+# Collections
+collections:
+  knowledge:
+    output: true
+    permalink: /knowledge/:title/
+  thoughts:
+    output: true
+    permalink: /thoughts/:title/
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: "knowledge"
+    values:
+      layout: "post"
+      category: "knowledge"
+  - scope:
+      path: ""
+      type: "thoughts"
+    values:
+      layout: "post"
+      category: "thoughts"
+
+# Markdown
+markdown: kramdown
+highlighter: rouge
+
+# Exclude
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor
+  - README.md

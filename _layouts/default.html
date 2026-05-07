@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% if page.title %}{{ page.title }} | {% endif %}{{ site.title }}</title>
+  <meta name="description" content="{{ page.excerpt | default: site.description | strip_html | truncate: 160 }}">
+  <link rel="stylesheet" href="{{ '/assets/css/page.css' | relative_url }}">
+  {% feed_meta %}
+  {% seo %}
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a class="site-title" href="{{ '/' | relative_url }}">{{ site.title }}</a>
+      <nav class="site-nav">
+        <a href="{{ '/knowledge/' | relative_url }}">Knowledge</a>
+        <a href="{{ '/thoughts/' | relative_url }}">Thoughts</a>
+        <a href="{{ '/about/' | relative_url }}">About</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-main">
+    <div class="container">
+      {{ content }}
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; {{ 'now' | date: "%Y" }} {{ site.author.name }}. Built with Jekyll &amp; GitHub Pages.</p>
+    </div>
+  </footer>
+</body>
+</html>
