@@ -84,21 +84,21 @@
       // Combine
       float noise = n1 * 0.5 + n2 * 0.3 + n3 * 0.2 + mouseInfluence;
 
-      // Color palette - dark, elegant
-      vec3 color1 = vec3(0.02, 0.02, 0.06); // deep dark blue
-      vec3 color2 = vec3(0.08, 0.04, 0.15); // dark purple
-      vec3 color3 = vec3(0.04, 0.08, 0.12); // dark teal
-      vec3 color4 = vec3(0.12, 0.06, 0.08); // dark rose
+      // Color palette - soft, warm blue
+      vec3 color1 = vec3(0.95, 0.97, 1.0);   // soft white-blue
+      vec3 color2 = vec3(0.85, 0.92, 0.98);  // light sky blue
+      vec3 color3 = vec3(0.88, 0.94, 0.97);  // pale azure
+      vec3 color4 = vec3(0.90, 0.95, 0.99);  // ice blue
 
       vec3 color = mix(color1, color2, smoothstep(-0.5, 0.5, noise));
       color = mix(color, color3, smoothstep(0.0, 0.8, n2));
       color = mix(color, color4, smoothstep(0.3, 0.9, n3) * 0.5);
 
-      // Subtle glow near mouse
-      color += vec3(0.05, 0.03, 0.08) * mouseInfluence * 2.0;
+      // Subtle warm glow near mouse
+      color += vec3(0.02, 0.04, 0.06) * mouseInfluence * 1.5;
 
-      // Vignette
-      float vignette = 1.0 - length(uv - 0.5) * 0.8;
+      // Soft vignette (very subtle)
+      float vignette = 1.0 - length(uv - 0.5) * 0.15;
       color *= vignette;
 
       gl_FragColor = vec4(color, 1.0);

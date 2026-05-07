@@ -1,26 +1,26 @@
 ---
-title: "Why I Started Writing"
+title: "为什么开始写作"
 date: 2025-05-07
-tags: [Writing, Reflection]
+tags: [写作, 思考]
 ---
 
-## Why Write a Technical Blog
+## 为什么要写技术博客
 
-As engineers, we accumulate knowledge and experience daily. Without organizing it, these things gradually fade. Writing forces you to clarify your thinking.
+作为工程师，日常工作中积累了大量的知识和经验，但如果不整理，这些东西会随时间逐渐模糊。写作是一种强迫自己把思路理清楚的方式。
 
-## Feynman's Method in Practice
+## 费曼学习法的实践
 
-Richard Feynman said if you can't explain a concept simply, you don't truly understand it. Technical writing is this idea in practice.
+Richard Feynman 说过，如果你不能把一个概念简单地解释给别人听，说明你还没有真正理解它。技术写作正是这一理念的实践。
 
-When I try to write clearly about a GPU scheduling mechanism, I often discover gaps in my understanding. Writing is the process of filling those gaps.
+当我试图写清楚 GPU 里一个调度机制的时候，常常发现自己对某些细节的理解其实还有模糊之处。写作的过程，就是弥补这些空白的过程。
 
-## My Plan
+## 我的计划
 
-I'll update every few days - short posts focused on consistency over length. Topics may include:
+打算每天或每几天更新一篇，不追求长篇大论，重在坚持和积累。内容可能涵盖：
 
-- Hardware architecture details
-- Paper reading notes
-- Industry observations
-- Occasional movie reviews or life reflections
+- 硬件架构的某个细节
+- 阅读论文时的笔记
+- 对行业动态的观察
+- 偶尔的影评或生活感悟
 
-I hope this site becomes a record of my thinking journey.
+希望这个小站能成为自己思考的记录。

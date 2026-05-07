@@ -1,12 +1,12 @@
 # Site settings
-title: "Suwtong"
-description: "GPGPU Architecture Engineer | AI Hardware"
+title: "粟维桐的博客"
+description: "GPGPU 架构工程师 | AI 硬件 | 技术笔记与随想"
 url: "https://suwtong.github.io"
 baseurl: ""
 
 # Author
 author:
-  name: "suwtong"
+  name: "粟维桐"
   email: "1329610561@qq.com"
   bio: "GPGPU Architecture Engineer | AI Hardware"
 

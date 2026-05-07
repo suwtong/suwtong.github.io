@@ -1,4 +1,4 @@
-/* ===== Page Styles (Knowledge, Thoughts, About) ===== */
+/* ===== Page Styles - Soft Blue Theme ===== */
 * {
   margin: 0;
   padding: 0;
@@ -7,8 +7,8 @@
 
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-  background: #0d1117;
-  color: #e6edf3;
+  background: #f8fafe;
+  color: #2c3e50;
   line-height: 1.75;
   font-size: 16px;
   min-height: 100vh;
@@ -22,13 +22,13 @@ body {
 
 /* ===== Header ===== */
 .site-header {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(44, 74, 110, 0.08);
   padding: 20px 0;
   backdrop-filter: blur(10px);
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(13, 17, 23, 0.9);
+  background: rgba(248, 250, 254, 0.92);
 }
 
 .site-header .container {
@@ -40,14 +40,14 @@ body {
 .site-title {
   font-size: 1.2rem;
   font-weight: 400;
-  color: #ffffff;
+  color: #2c4a6e;
   text-decoration: none;
   letter-spacing: 2px;
 }
 
 .site-nav a {
   margin-left: 24px;
-  color: rgba(255, 255, 255, 0.6);
+  color: #5a7a9a;
   text-decoration: none;
   font-size: 0.9rem;
   letter-spacing: 0.5px;
@@ -55,7 +55,7 @@ body {
 }
 
 .site-nav a:hover {
-  color: #ffffff;
+  color: #2c4a6e;
 }
 
 /* ===== Main ===== */
@@ -68,7 +68,7 @@ body {
 .section-header {
   margin-bottom: 40px;
   padding-bottom: 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(44, 74, 110, 0.08);
 }
 
 .section-header h1 {
@@ -76,10 +76,11 @@ body {
   font-weight: 300;
   letter-spacing: 2px;
   margin-bottom: 8px;
+  color: #2c4a6e;
 }
 
 .section-header p {
-  color: rgba(255, 255, 255, 0.5);
+  color: #7a9ab5;
   font-size: 0.95rem;
 }
 
@@ -90,12 +91,12 @@ body {
 
 .post-list li {
   padding: 24px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(44, 74, 110, 0.06);
   transition: background 0.3s;
 }
 
 .post-list li:hover {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(123, 175, 212, 0.04);
   margin: 0 -16px;
   padding-left: 16px;
   padding-right: 16px;
@@ -104,28 +105,28 @@ body {
 
 .post-list .post-title {
   font-size: 1.15rem;
-  font-weight: 400;
+  font-weight: 500;
   margin-bottom: 6px;
 }
 
 .post-list .post-title a {
-  color: #e6edf3;
+  color: #2c3e50;
   text-decoration: none;
   transition: color 0.3s;
 }
 
 .post-list .post-title a:hover {
-  color: #79c0ff;
+  color: #4a8ab5;
 }
 
 .post-list .post-meta {
   font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: #7a9ab5;
 }
 
 .post-list .post-excerpt {
   margin-top: 8px;
-  color: rgba(255, 255, 255, 0.55);
+  color: #5a6d7e;
   font-size: 0.9rem;
   line-height: 1.6;
 }
@@ -134,7 +135,7 @@ body {
 .post-header {
   margin-bottom: 36px;
   padding-bottom: 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(44, 74, 110, 0.08);
 }
 
 .post-title {
@@ -143,11 +144,12 @@ body {
   letter-spacing: 0.5px;
   line-height: 1.4;
   margin-bottom: 12px;
+  color: #2c4a6e;
 }
 
 .post-meta {
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.4);
+  color: #7a9ab5;
 }
 
 .post-tags {
@@ -156,13 +158,13 @@ body {
 
 .tag {
   display: inline-block;
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.7);
+  background: rgba(74, 138, 181, 0.08);
+  color: #4a8ab5;
   padding: 2px 10px;
   border-radius: 12px;
   font-size: 0.75rem;
   margin-right: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(74, 138, 181, 0.15);
 }
 
 /* ===== Post Content ===== */
@@ -172,30 +174,30 @@ body {
 
 .post-content h2 {
   font-size: 1.5rem;
-  font-weight: 400;
+  font-weight: 500;
   margin-top: 2.5em;
   margin-bottom: 0.8em;
-  color: #ffffff;
+  color: #2c4a6e;
   letter-spacing: 0.5px;
 }
 
 .post-content h3 {
   font-size: 1.2rem;
-  font-weight: 400;
+  font-weight: 500;
   margin-top: 2em;
   margin-bottom: 0.6em;
-  color: rgba(255, 255, 255, 0.9);
+  color: #3a5a7a;
 }
 
 .post-content p {
   margin-bottom: 1.2em;
-  color: rgba(255, 255, 255, 0.8);
+  color: #3a4a5a;
 }
 
 .post-content ul, .post-content ol {
   margin-bottom: 1.2em;
   padding-left: 24px;
-  color: rgba(255, 255, 255, 0.75);
+  color: #4a5a6a;
 }
 
 .post-content li {
@@ -204,16 +206,17 @@ body {
 
 .post-content code {
   font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(74, 138, 181, 0.06);
   padding: 2px 7px;
   border-radius: 4px;
   font-size: 0.88em;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(74, 138, 181, 0.1);
+  color: #3a5a7a;
 }
 
 .post-content pre {
-  background: #161b22;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #f0f4f8;
+  border: 1px solid rgba(44, 74, 110, 0.1);
   border-radius: 8px;
   padding: 20px;
   overflow-x: auto;
@@ -226,49 +229,50 @@ body {
   border: none;
   font-size: 0.85rem;
   line-height: 1.6;
+  color: #2c3e50;
 }
 
 .post-content blockquote {
-  border-left: 3px solid rgba(121, 192, 255, 0.4);
+  border-left: 3px solid #7bafd4;
   padding-left: 16px;
   margin: 1.5em 0;
-  color: rgba(255, 255, 255, 0.6);
+  color: #5a7a9a;
   font-style: italic;
 }
 
 .post-content hr {
   border: none;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(44, 74, 110, 0.08);
   margin: 2em 0;
 }
 
 .post-content a {
-  color: #79c0ff;
+  color: #4a8ab5;
   text-decoration: none;
   border-bottom: 1px solid transparent;
   transition: border-color 0.3s;
 }
 
 .post-content a:hover {
-  border-bottom-color: #79c0ff;
+  border-bottom-color: #4a8ab5;
 }
 
 /* Post Footer */
 .post-footer {
   margin-top: 48px;
   padding-top: 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(44, 74, 110, 0.08);
 }
 
 .post-footer a {
-  color: rgba(255, 255, 255, 0.5);
+  color: #7a9ab5;
   text-decoration: none;
   font-size: 0.9rem;
   transition: color 0.3s;
 }
 
 .post-footer a:hover {
-  color: #79c0ff;
+  color: #4a8ab5;
 }
 
 /* ===== Page Content (About etc.) ===== */
@@ -277,17 +281,18 @@ body {
   font-weight: 400;
   margin-top: 2em;
   margin-bottom: 0.8em;
+  color: #2c4a6e;
 }
 
 .page-content p {
   margin-bottom: 1em;
-  color: rgba(255, 255, 255, 0.8);
+  color: #3a4a5a;
 }
 
 .page-content ul {
   padding-left: 20px;
   margin-bottom: 1em;
-  color: rgba(255, 255, 255, 0.75);
+  color: #4a5a6a;
 }
 
 .page-content li {
@@ -295,17 +300,17 @@ body {
 }
 
 .page-content a {
-  color: #79c0ff;
+  color: #4a8ab5;
   text-decoration: none;
 }
 
 /* ===== Footer ===== */
 .site-footer {
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(44, 74, 110, 0.06);
   padding: 24px 0;
   text-align: center;
   font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.3);
+  color: #7a9ab5;
 }
 
 /* ===== Responsive ===== */

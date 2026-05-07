@@ -1,28 +1,27 @@
 ---
 layout: page
-title: About
+title: 关于
 permalink: /about/
 ---
 
-## About Me
+## 关于我
 
-GPGPU Architecture Engineer, focused on AI hardware acceleration.
+GPGPU 架构工程师，专注于 AI 方向的硬件加速器设计。
 
-### Expertise
+### 专业方向
 
-- GPGPU Microarchitecture Design
-- AI Inference / Training Accelerators
-- High Performance Computing Architecture
-- GPU Compiler & Runtime (learning)
+- GPGPU 微架构设计
+- AI 推理/训练加速器
+- 高性能计算架构
+- GPU 编译器与运行时（持续学习中）
 
-### About This Site
+### 关于这个站点
 
-This site has two sections:
+这个站点分为两个部分：
 
-- **[Knowledge](/knowledge/)** - Technical notes on GPGPU architecture, AI hardware, and related topics
-- **[Thoughts](/thoughts/)** - Movie reviews, opinions, and life reflections
+- **[技术笔记](/knowledge/)** — GPGPU 架构、AI 硬件等专业内容
+- **[随想杂谈](/thoughts/)** — 影评、观点、生活感悟
 
-### Contact
+### 联系方式
 
-- GitHub: [suwtong](https://github.com/suwtong)
 - Email: 1329610561@qq.com
