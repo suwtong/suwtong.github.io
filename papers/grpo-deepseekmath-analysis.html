@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRPO (Group Relative Policy Optimization) 论文深度分析报告</title>
+<style>
+  :root { --primary: #1a365d; --accent: #2b6cb0; --bg: #ffffff; --text: #2d3748; --gray: #718096; --light: #f7fafc; --border: #e2e8f0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Source Han Serif SC", "Noto Serif CJK SC", "Georgia", serif; line-height: 1.9; color: var(--text); background: var(--bg); max-width: 900px; margin: 0 auto; padding: 40px 24px; }
+  h1 { font-size: 1.8em; color: var(--primary); border-bottom: 3px solid var(--primary); padding-bottom: 12px; margin: 40px 0 20px; }
+  h2 { font-size: 1.4em; color: var(--primary); margin: 36px 0 16px; border-left: 4px solid var(--accent); padding-left: 12px; }
+  h3 { font-size: 1.15em; color: var(--accent); margin: 28px 0 12px; }
+  h4 { font-size: 1.05em; color: #4a5568; margin: 20px 0 10px; }
+  p { margin: 10px 0; text-align: justify; }
+  .meta-box { background: var(--light); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; margin: 20px 0; }
+  .meta-box p { margin: 4px 0; font-size: 0.95em; }
+  .meta-box strong { color: var(--primary); }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.92em; }
+  th, td { border: 1px solid var(--border); padding: 10px 14px; text-align: left; }
+  th { background: #edf2f7; color: var(--primary); font-weight: 600; }
+  td { line-height: 1.6; }
+  .highlight-box { background: #ebf8ff; border-left: 4px solid var(--accent); padding: 14px 18px; margin: 16px 0; border-radius: 0 6px 6px 0; }
+  .qa-block { background: var(--light); border-radius: 8px; padding: 18px 22px; margin: 16px 0; }
+  .qa-block .question { font-weight: 700; color: var(--primary); margin-bottom: 8px; }
+  code { background: #edf2f7; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; font-family: "SF Mono", "Fira Code", monospace; }
+  .json-block { background: #1a202c; color: #a0e8af; padding: 18px; border-radius: 8px; margin: 16px 0; overflow-x: auto; font-family: "SF Mono", monospace; font-size: 0.85em; line-height: 1.6; white-space: pre-wrap; }
+  .divider { border: none; border-top: 2px solid var(--border); margin: 40px 0; }
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  .summary-card { background: var(--light); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .summary-card h4 { margin-top: 0; color: var(--accent); }
+  @media (max-width: 640px) { .summary-grid { grid-template-columns: 1fr; } body { padding: 16px; } }
+</style>
+</head>
+<body>
+
+<h1>GRPO (Group Relative Policy Optimization) 深度分析报告</h1>
+
+<div class="meta-box">
+  <p><strong>论文标题</strong>：DeepSeekMath: Pushing the Limits of Mathematical Reasoning in Open Language Models</p>
+  <p><strong>论文链接</strong>：<a href="https://arxiv.org/abs/2402.03300">https://arxiv.org/abs/2402.03300</a></p>
+  <p><strong>作者团队</strong>：Zhihong Shao, Peiyi Wang, Qihao Zhu, Runxin Xu, Junxiao Song, Xiao Bi, Haowei Zhang, Mingchuan Zhang, Y.K. Li, Y. Wu, Daya Guo</p>
+  <p><strong>关联机构</strong>：DeepSeek-AI, Tsinghua University, Peking University</p>
+  <p><strong>发表时间</strong>：2024年2月（arXiv）</p>
+  <p><strong>分析聚焦</strong>：本报告侧重论文的 RL 方法创新——GRPO 算法部分（第4节），数据工程部分从略。</p>
+</div>
+
+<h2>一、论文基本信息</h2>
+
+<table>
+  <tr><th style="width:20%">项目</th><th>内容</th></tr>
+  <tr><td>研究问题</td><td>如何在降低 PPO 训练资源消耗的同时，有效提升数学推理能力？</td></tr>
+  <tr><td>核心方法</td><td>GRPO：去掉 PPO 的 value model（critic），用组内相对奖励作为 baseline 估计 advantage</td></tr>
+  <tr><td>关键洞察</td><td>对同一问题采样 G 个回答，用组内均值/标准差归一化奖励，既省去 value model 又天然匹配 reward model 的比较本质</td></tr>
+  <tr><td>关键结论</td><td>GRPO 仅用 144K 数学问题的 RL 训练，将 DeepSeekMath-Instruct 从 MATH 46.8% 提升至 51.7%</td></tr>
+  <tr><td>历史地位</td><td>被 DeepSeek-R1 等后续模型广泛采用，成为 LLM 推理增强 RL 的标准算法之一</td></tr>
+</table>
+
+<h2>二、摘要与核心贡献剖析</h2>
+
+<p>本文提出 DeepSeekMath 7B 模型，在竞赛级 MATH 基准上达到 51.7% 正确率（接近 GPT-4 水平），其核心技术贡献包括：(1) 从 Common Crawl 中筛选 120B 高质量数学 token 的数据管线；(2) GRPO——一种高效的 PPO 变体，去掉 value model 节省训练资源。本报告聚焦 GRPO 算法。</p>
+
+<div class="highlight-box">
+  <strong>GRPO 的核心设计思想</strong>：
+  <ul style="margin-top:8px; padding-left:20px;">
+    <li>PPO 需要训练一个与 policy 同等规模的 value model 来估计 advantage——在 LLM 场景中开销巨大</li>
+    <li>GRPO 的替代方案：对同一 prompt 采样 G 个输出，用组内奖励的均值和标准差来归一化，归一化后的奖励直接作为 advantage</li>
+    <li>这种"组内相对"的设计与 reward model 的训练方式（同一问题多个输出的相对比较）天然一致</li>
+  </ul>
+</div>
+
+<h2>三、背景知识补充</h2>
+
+<h3>3.1 PPO 在 LLM 微调中的角色</h3>
+<p>PPO (Proximal Policy Optimization) 是 InstructGPT/ChatGPT 采用的 RL 算法。在 LLM 场景中，PPO 需要同时维护四个模型：</p>
+<table>
+  <tr><th>模型</th><th>作用</th><th>参数量</th></tr>
+  <tr><td>Policy Model π_θ</td><td>当前策略（被优化的模型）</td><td>与目标 LLM 相同</td></tr>
+  <tr><td>Reference Model π_ref</td><td>KL 约束的锚点（冻结）</td><td>与目标 LLM 相同</td></tr>
+  <tr><td>Reward Model r_φ</td><td>评估输出质量（冻结）</td><td>通常为 LLM 规模</td></tr>
+  <tr><td>Value Model V_ψ</td><td>估计每个 token 的期望累计奖励（需训练）</td><td>与目标 LLM 相同</td></tr>
+</table>
+<p>Value Model 的问题：(1) 显存翻倍——多了一个与 policy 同等规模的可训练模型；(2) 训练困难——数学场景中只有最后一个 token 获得 reward，中间 token 的 value 估计不稳定。</p>
+
+<h3>3.2 Advantage 的含义</h3>
+<p>Advantage A_t = Q(s_t, a_t) - V(s_t)，即在状态 s_t 下采取动作 a_t 相比"平均水平"好多少。在 PPO 中用 GAE (Generalized Advantage Estimation) 计算，需要 value model 提供 V 估计。GRPO 的创新在于不用 value model，而是直接从同一 prompt 的多个采样中估计"平均水平"。</p>
+
+<h2>四、方法与算法原理</h2>
+
+<h3>4.1 PPO 目标函数（对照）</h3>
+<div class="json-block">J_PPO(θ) = E_{q~P(Q), o~π_θ_old(O|q)} [
+  (1/|o|) Σ_{t=1}^{|o|} min(
+    [π_θ(o_t|q,o_<t) / π_θ_old(o_t|q,o_<t)] · A_t,
+    clip([π_θ/π_θ_old], 1-ε, 1+ε) · A_t
+  )
+]
+
+其中 A_t 由 GAE 基于 value model V_ψ 计算
+PPO reward 包含 KL 惩罚：r_t = r_φ(q, o_≤t) - β·log[π_θ(o_t|q,o_<t) / π_ref(o_t|q,o_<t)]</div>
+
+<h3>4.2 GRPO 目标函数</h3>
+<div class="json-block">J_GRPO(θ) = E_{q~P(Q), {o_i}^G_{i=1} ~ π_θ_old(O|q)} [
+  (1/G) Σ_{i=1}^{G} (1/|o_i|) Σ_{t=1}^{|o_i|} {
+    min(
+      [π_θ(o_{i,t}|q,o_{i,<t}) / π_θ_old(o_{i,t}|q,o_{i,<t})] · A_hat_{i,t},
+      clip([π_θ/π_θ_old], 1-ε, 1+ε) · A_hat_{i,t}
+    )
+    - β · D_KL(π_θ || π_ref)
+  }
+]
+
+关键区别：
+1. 采样 G 个输出（论文中 G=64），而非单个
+2. A_hat_{i,t} 由组内相对奖励计算，不需要 value model
+3. KL 惩罚从 reward 中分离出来，作为独立正则项加入损失</div>
+
+<h3>4.3 Advantage 估计：Outcome Supervision</h3>
+<div class="json-block">对每个问题 q，采样 G 个输出 {o_1, ..., o_G}
+Reward model 评分得到 {r_1, ..., r_G}
+
+归一化：r_tilde_i = (r_i - mean(r)) / std(r)
+
+Advantage：A_hat_{i,t} = r_tilde_i（对 o_i 中所有 token 相同）
+
+含义：
+  - 如果 o_i 的奖励高于组内平均 → advantage > 0 → 增大 o_i 的概率
+  - 如果 o_i 的奖励低于组内平均 → advantage < 0 → 减小 o_i 的概率
+  - 标准差归一化确保梯度幅度不受奖励绝对值影响</div>
+
+<h3>4.4 Advantage 估计：Process Supervision</h3>
+<div class="json-block">对每个输出 o_i 的每个推理步骤 j，process reward model 给出 r^{index(j)}_i
+
+归一化：跨所有 G 个输出的所有步骤奖励一起计算 mean 和 std
+
+Advantage：A_hat_{i,t} = Σ_{index(j) >= t} r_tilde^{index(j)}_i
+  （从当前 token 之后所有步骤的归一化奖励之和）
+
+相比 Outcome Supervision：提供更细粒度的信号，但需要训练 process reward model</div>
+
+<h3>4.5 KL 散度估计器</h3>
+<div class="json-block">D_KL(π_θ || π_ref) = [π_ref(o_{i,t}|q,o_{i,<t}) / π_θ(o_{i,t}|q,o_{i,<t})] 
+                   - log[π_ref(o_{i,t}|q,o_{i,<t}) / π_θ(o_{i,t}|q,o_{i,<t})] - 1
+
+性质：无偏、保证非负（与 log-ratio 估计器不同，后者可能为负）</div>
+
+<h3>4.6 迭代 GRPO (Iterative GRPO)</h3>
+<p>为应对 reward model 在策略进步后可能过时的问题，论文提出迭代训练：</p>
+<ol style="padding-left:20px; margin:10px 0;">
+  <li>用当前策略采样新输出，构建新的 reward model 训练集</li>
+  <li>持续训练 reward model（加入 10% 历史数据防止遗忘）</li>
+  <li>将当前策略设为新的 reference model</li>
+  <li>用新 reward model 继续训练策略</li>
+</ol>
+
+<h2>五、实验设置</h2>
+
+<table>
+  <tr><th>维度</th><th>配置</th></tr>
+  <tr><td>基线模型</td><td>DeepSeekMath-Instruct 7B（在 DeepSeekMath-Base 7B 上进行 SFT）</td></tr>
+  <tr><td>RL 训练数据</td><td>~144K GSM8K + MATH 的 chain-of-thought 格式问题（英文）</td></tr>
+  <tr><td>Reward Model</td><td>基于 DeepSeekMath-Base 7B，learning rate 2e-5</td></tr>
+  <tr><td>GRPO 超参数</td><td>Policy LR: 1e-6, KL coefficient β: 0.04, Group size G: 64, Max length: 1024, Batch: 1024</td></tr>
+  <tr><td>采样策略</td><td>每个问题采样 64 个输出，policy 每次 exploration 仅更新一次</td></tr>
+</table>
+
+<h2>六、实验结果</h2>
+
+<h3>6.1 GRPO 效果</h3>
+<table>
+  <tr><th>模型</th><th>GSM8K</th><th>MATH</th><th>CMATH (中文)</th></tr>
+  <tr><td>DeepSeekMath-Instruct 7B</td><td>82.9%</td><td>46.8%</td><td>84.6%</td></tr>
+  <tr><td>DeepSeekMath-RL 7B (GRPO)</td><td>88.2%</td><td>51.7%</td><td>88.8%</td></tr>
+  <tr><td>提升幅度</td><td>+5.3</td><td>+4.9</td><td>+4.2</td></tr>
+</table>
+
+<h3>6.2 关键发现</h3>
+<ul style="padding-left:20px; margin:10px 0;">
+  <li><strong>域外泛化</strong>：仅在 GSM8K+MATH 英文数据上训练，中文数学任务 (CMATH) 和工具使用任务也获得提升</li>
+  <li><strong>代码预训练有益</strong>：从 code model 初始化比从通用 LLM 初始化效果更好</li>
+  <li><strong>在线 > 离线</strong>：在线 RL（GRPO、PPO）优于离线方法（DPO、RFT）</li>
+  <li><strong>超越 PPO</strong>：GRPO 在性能相当的情况下显著减少显存使用</li>
+</ul>
+
+<h2>七、关键问答</h2>
+
+<div class="qa-block">
+  <p class="question">Q1：为什么用组内均值替代 value model 是合理的？</p>
+  <p><strong>A</strong>：Value model V(s_t) 的本质是"在当前状态下，按照当前策略继续下去，期望能获得的总奖励"。对于整个输出级别的 outcome supervision，这等价于"对同一 prompt 的平均奖励"。GRPO 通过对同一 prompt 采样 G 个输出并取均值，直接用蒙特卡洛方法估计了这个期望。当 G 足够大（论文中 G=64），估计精度足够替代训练一个参数化的 value model。这是用计算换内存的权衡——多采样 64 次来避免训练一个 7B 参数的 value model。</p>
+</div>
+
+<div class="qa-block">
+  <p class="question">Q2：GRPO 的 KL 惩罚为什么要从 reward 中分离出来？</p>
+  <p><strong>A</strong>：PPO 中 KL 惩罚嵌入 reward：r_t = r_φ - β·log(π/π_ref)，这导致 advantage 计算时需要 value model 同时学习"真实奖励"和"KL 惩罚"的混合信号，增加训练难度。GRPO 将 KL 作为独立正则项加入损失函数，优势有二：(1) advantage A_hat 仅反映输出质量的相对好坏，信号更纯净；(2) KL 正则项可以独立控制强度，不干扰组内奖励的归一化。</p>
+</div>
+
+<div class="qa-block">
+  <p class="question">Q3：G=64 的组大小是否太大？对计算开销有何影响？</p>
+  <p><strong>A</strong>：G=64 意味着每个训练 step 需要对每个 prompt 生成 64 个完整输出。这确实带来大量推理开销，但与 PPO 的 4 模型方案相比仍然更高效——节省了一整个 7B value model 的显存和训练成本。实际工程中，生成阶段可以高度并行（大 batch 推理），而且每次 exploration 后策略只更新一次（low update-to-data ratio），进一步减少训练步数。</p>
+</div>
+
+<div class="qa-block">
+  <p class="question">Q4：GRPO 与 DPO 相比，本质区别是什么？</p>
+  <p><strong>A</strong>：在论文提出的统一框架下，二者都是偏好优化方法，但有关键差异：<br>
+  (1) <strong>在线 vs 离线</strong>：GRPO 是在线方法（每步从当前策略采样），DPO 是离线方法（使用固定的偏好数据集）。在线方法能持续获得当前策略的分布信息，避免分布偏移。<br>
+  (2) <strong>奖励信号</strong>：GRPO 使用显式 reward model 评分，DPO 使用隐式奖励（策略本身定义奖励）。<br>
+  (3) <strong>优化粒度</strong>：GRPO 可以做 token-level 优化（process supervision），DPO 是 sequence-level。<br>
+  论文实验表明在数学推理任务中，在线 RL（GRPO）优于离线优化（DPO）。</p>
+</div>
+
+<div class="qa-block">
+  <p class="question">Q5：为什么 GRPO 的 RL 训练能在域外任务上也获得提升？</p>
+  <p><strong>A</strong>：论文推测 RL 训练不仅教会模型"如何回答数学题"，更强化了底层的推理模式——如逻辑链路的严谨性、步骤之间的因果连贯性。这些元能力可以迁移到其他需要结构化推理的任务（如中文数学、工具调用）。这与 InstructGPT 中"跟随指令"能力泛化到非英语任务的现象类似——RL 对齐的是一种通用的认知模式，而非特定任务的表面形式。</p>
+</div>
+
+<hr class="divider">
+
+<h2>八、总结与后续影响</h2>
+
+<div class="summary-grid">
+  <div class="summary-card">
+    <h4>算法创新</h4>
+    <p>用组内相对奖励替代 value model 进行 advantage 估计，将 PPO 的 4 模型方案简化为 3 模型（policy + reference + reward），显存节省约 25-40%。</p>
+  </div>
+  <div class="summary-card">
+    <h4>理论统一</h4>
+    <p>提出了统一框架理解 RFT、DPO、PPO、GRPO——它们都是直接或简化的 RL 技术，差异在于 on/off-policy、advantage 估计方式和更新频率。</p>
+  </div>
+  <div class="summary-card">
+    <h4>工程实践</h4>
+    <p>G=64 采样 + 单步更新 + β=0.04 KL 约束的配置被后续工作广泛复用。证明了即使在较小模型 (7B) 上，RL 也能带来显著推理提升。</p>
+  </div>
+  <div class="summary-card">
+    <h4>后续影响</h4>
+    <p>GRPO 被 DeepSeek-R1、DeepSeek-V2.5 等直接采用；启发了其他无 value model 的 RL 算法；证明了数学推理是 RL for LLM 的理想测试场景。</p>
+  </div>
+</div>
+
+</body>
+</html>

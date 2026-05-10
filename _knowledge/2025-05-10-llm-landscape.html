@@ -298,16 +298,16 @@ DeepSeek V3 训练技术栈公开信息：自研 HAI-LLM 框架（基于 Megatro
 <h3>关键算法与技术来源</h3>
 
 <table class="info-table">
-<tr><th>技术</th><th>来源</th><th>论文</th><th>当前状态</th></tr>
-<tr><td>Transformer</td><td>Google Brain, 2017</td><td><a href="https://arxiv.org/abs/1706.03762" target="_blank">Attention Is All You Need</a></td><td>所有 LLM 基础架构</td></tr>
-<tr><td>MoE</td><td>早期 Google；DeepSeek/Mixtral 发扬</td><td><a href="https://arxiv.org/abs/1701.06538" target="_blank">Sparsely-Gated MoE Layer</a></td><td>主流趋势，GPT-4/DeepSeek-V3/Llama 4 均采用</td></tr>
-<tr><td>RLHF</td><td>OpenAI / Anthropic</td><td><a href="https://arxiv.org/abs/2203.02155" target="_blank">InstructGPT (Training LMs to Follow Instructions)</a></td><td>标准对齐方法</td></tr>
-<tr><td>DPO</td><td>Stanford, 2023</td><td><a href="https://arxiv.org/abs/2305.18290" target="_blank">Direct Preference Optimization</a></td><td>简化对齐，无需 Critic，被广泛采用</td></tr>
-<tr><td>GRPO</td><td>DeepSeek (R1)</td><td><a href="https://arxiv.org/abs/2402.03300" target="_blank">DeepSeekMath (GRPO 首次提出)</a></td><td>组相对策略优化，无 Critic 的 RL 方案</td></tr>
-<tr><td>Flash Attention</td><td>Tri Dao, Stanford</td><td><a href="https://arxiv.org/abs/2205.14135" target="_blank">FlashAttention</a> / <a href="https://arxiv.org/abs/2307.08691" target="_blank">FlashAttention-2</a></td><td>事实标准，所有框架集成</td></tr>
-<tr><td>RoPE</td><td>苏剑林 / Meta</td><td><a href="https://arxiv.org/abs/2104.09864" target="_blank">RoFormer: Rotary Position Embedding</a></td><td>主流位置编码方案</td></tr>
-<tr><td>GQA / MQA</td><td>Google</td><td><a href="https://arxiv.org/abs/1911.02150" target="_blank">MQA</a> / <a href="https://arxiv.org/abs/2305.13245" target="_blank">GQA</a></td><td>减少 KV Cache，广泛采用</td></tr>
-<tr><td>MLA</td><td>DeepSeek</td><td><a href="https://arxiv.org/abs/2405.04434" target="_blank">DeepSeek-V2</a></td><td>多头潜在注意力，KV Cache 压缩到极致</td></tr>
+<tr><th>技术</th><th>来源</th><th>论文</th><th>深度分析</th><th>当前状态</th></tr>
+<tr><td>Transformer</td><td>Google Brain, 2017</td><td><a href="https://arxiv.org/abs/1706.03762" target="_blank">Attention Is All You Need</a></td><td><a href="/papers/attention-is-all-you-need-analysis.html">阅读报告</a></td><td>所有 LLM 基础架构</td></tr>
+<tr><td>MoE</td><td>早期 Google；DeepSeek/Mixtral 发扬</td><td><a href="https://arxiv.org/abs/1701.06538" target="_blank">Sparsely-Gated MoE Layer</a></td><td><a href="/papers/moe-analysis.html">阅读报告</a></td><td>主流趋势，GPT-4/DeepSeek-V3/Llama 4 均采用</td></tr>
+<tr><td>RLHF</td><td>OpenAI / Anthropic</td><td><a href="https://arxiv.org/abs/2203.02155" target="_blank">InstructGPT (Training LMs to Follow Instructions)</a></td><td><a href="/papers/rlhf-instructgpt-analysis.html">阅读报告</a></td><td>标准对齐方法</td></tr>
+<tr><td>DPO</td><td>Stanford, 2023</td><td><a href="https://arxiv.org/abs/2305.18290" target="_blank">Direct Preference Optimization</a></td><td><a href="/papers/dpo-analysis.html">阅读报告</a></td><td>简化对齐，无需 Critic，被广泛采用</td></tr>
+<tr><td>GRPO</td><td>DeepSeek (R1)</td><td><a href="https://arxiv.org/abs/2402.03300" target="_blank">DeepSeekMath (GRPO 首次提出)</a></td><td><a href="/papers/grpo-deepseekmath-analysis.html">阅读报告</a></td><td>组相对策略优化，无 Critic 的 RL 方案</td></tr>
+<tr><td>Flash Attention</td><td>Tri Dao, Stanford</td><td><a href="https://arxiv.org/abs/2205.14135" target="_blank">FlashAttention</a> / <a href="https://arxiv.org/abs/2307.08691" target="_blank">FlashAttention-2</a></td><td><a href="/papers/flash-attention-analysis.html">阅读报告</a></td><td>事实标准，所有框架集成</td></tr>
+<tr><td>RoPE</td><td>苏剑林 / Meta</td><td><a href="https://arxiv.org/abs/2104.09864" target="_blank">RoFormer: Rotary Position Embedding</a></td><td><a href="/papers/rope-analysis.html">阅读报告</a></td><td>主流位置编码方案</td></tr>
+<tr><td>GQA / MQA</td><td>Google</td><td><a href="https://arxiv.org/abs/1911.02150" target="_blank">MQA</a> / <a href="https://arxiv.org/abs/2305.13245" target="_blank">GQA</a></td><td><a href="/papers/mqa-gqa-analysis.html">阅读报告</a></td><td>减少 KV Cache，广泛采用</td></tr>
+<tr><td>MLA</td><td>DeepSeek</td><td><a href="https://arxiv.org/abs/2405.04434" target="_blank">DeepSeek-V2</a></td><td><a href="/papers/mla-deepseek-v2-analysis.html">阅读报告</a></td><td>多头潜在注意力，KV Cache 压缩到极致</td></tr>
 </table>
 
 <h2>推理框架层</h2>

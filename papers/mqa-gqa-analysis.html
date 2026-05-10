@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MQA & GQA 论文深度分析报告</title>
+<style>
+  :root { --primary: #1a365d; --accent: #2b6cb0; --bg: #ffffff; --text: #2d3748; --gray: #718096; --light: #f7fafc; --border: #e2e8f0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Source Han Serif SC", "Noto Serif CJK SC", "Georgia", serif; line-height: 1.9; color: var(--text); background: var(--bg); max-width: 900px; margin: 0 auto; padding: 40px 24px; }
+  h1 { font-size: 1.8em; color: var(--primary); border-bottom: 3px solid var(--primary); padding-bottom: 12px; margin: 40px 0 20px; }
+  h2 { font-size: 1.4em; color: var(--primary); margin: 36px 0 16px; border-left: 4px solid var(--accent); padding-left: 12px; }
+  h3 { font-size: 1.15em; color: var(--accent); margin: 28px 0 12px; }
+  p { margin: 10px 0; text-align: justify; }
+  .meta-box { background: var(--light); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; margin: 20px 0; }
+  .meta-box p { margin: 4px 0; font-size: 0.95em; }
+  .meta-box strong { color: var(--primary); }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.92em; }
+  th, td { border: 1px solid var(--border); padding: 10px 14px; text-align: left; }
+  th { background: #edf2f7; color: var(--primary); font-weight: 600; }
+  td { line-height: 1.6; }
+  .highlight-box { background: #ebf8ff; border-left: 4px solid var(--accent); padding: 14px 18px; margin: 16px 0; border-radius: 0 6px 6px 0; }
+  .qa-block { background: var(--light); border-radius: 8px; padding: 18px 22px; margin: 16px 0; }
+  .qa-block .question { font-weight: 700; color: var(--primary); margin-bottom: 8px; }
+  code { background: #edf2f7; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; font-family: "SF Mono", "Fira Code", monospace; }
+  .json-block { background: #1a202c; color: #a0e8af; padding: 18px; border-radius: 8px; margin: 16px 0; overflow-x: auto; font-family: "SF Mono", monospace; font-size: 0.85em; line-height: 1.6; white-space: pre-wrap; }
+  .divider { border: none; border-top: 2px solid var(--border); margin: 40px 0; }
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  .summary-card { background: var(--light); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .summary-card h4 { margin-top: 0; color: var(--accent); }
+  @media (max-width: 640px) { .summary-grid { grid-template-columns: 1fr; } body { padding: 16px; } }
+</style>
+</head>
+<body>
+
+<h1>MQA & GQA (Multi-Query / Grouped-Query Attention) 深度分析报告</h1>
+
+<div class="meta-box">
+  <p><strong>MQA 论文</strong>：Fast Transformer Decoding: One Write-Head is All You Need — Noam Shazeer, Google, 2019</p>
+  <p><strong>MQA 链接</strong>：<a href="https://arxiv.org/abs/1911.02150">https://arxiv.org/abs/1911.02150</a></p>
+  <p><strong>GQA 论文</strong>：GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints — Joshua Ainslie, James Lee-Thorp, Michiel de Jong et al., Google Research, 2023</p>
+  <p><strong>GQA 链接</strong>：<a href="https://arxiv.org/abs/2305.13245">https://arxiv.org/abs/2305.13245</a></p>
+</div>
+
+<h2>一、问题背景：自回归推理的内存带宽瓶颈</h2>
+
+<p>Transformer 自回归解码（incremental inference）的核心瓶颈不在计算量，而在<strong>内存带宽</strong>。每生成一个 token，都需要：</p>
+<ol style="padding-left:20px; margin:10px 0;">
+  <li>从显存加载完整的 KV Cache（所有历史 token 的 key/value 向量）</li>
+  <li>计算当前 query 与所有 key 的注意力分数</li>
+  <li>用注意力权重加权 value</li>
+</ol>
+
+<div class="highlight-box">
+  <strong>瓶颈所在</strong>：对于 MHA (Multi-Head Attention)，KV Cache 大小为 <code>2 × n_layers × n_heads × seq_len × d_head</code>。每个 token 生成需要将整个 KV Cache 从 HBM 加载一次。当序列长度和模型规模增大时，内存带宽成为解码速度的决定因素。
+</div>
+
+<h2>二、MQA：极致压缩——所有 head 共享一份 K/V</h2>
+
+<h3>2.1 核心思想</h3>
+<p>标准 MHA 中，每个 attention head 有独立的 Q/K/V 投影。MQA 的改变：<strong>保持 Q 的 H 个独立头，但所有头共享同一个 K 和同一个 V</strong>。</p>
+
+<div class="json-block">Multi-Head Attention (MHA):
+  Q: [batch, n_heads, seq, d_head]    ← H 个独立的 query 头
+  K: [batch, n_heads, seq, d_head]    ← H 个独立的 key 头
+  V: [batch, n_heads, seq, d_head]    ← H 个独立的 value 头
+
+Multi-Query Attention (MQA):
+  Q: [batch, n_heads, seq, d_head]    ← H 个独立的 query 头（不变）
+  K: [batch, 1, seq, d_head]          ← 所有头共享 1 个 key
+  V: [batch, 1, seq, d_head]          ← 所有头共享 1 个 value
+
+KV Cache 大小压缩比：H 倍（H 通常为 32-128）</div>
+
+<h3>2.2 性能分析</h3>
+<table>
+  <tr><th>维度</th><th>MHA</th><th>MQA</th></tr>
+  <tr><td>KV Cache 大小</td><td>2 × H × seq × d_head</td><td>2 × 1 × seq × d_head</td></tr>
+  <tr><td>推理带宽需求</td><td>高（每步加载全部 KV）</td><td>低（仅加载 1/H 的 KV）</td></tr>
+  <tr><td>模型表达能力</td><td>最强（每头独立 K/V 表示）</td><td>受限（所有 query 看到相同 K/V）</td></tr>
+  <tr><td>训练时间</td><td>基线</td><td>基本相同（计算量差异小）</td></tr>
+  <tr><td>推理速度</td><td>基线</td><td>显著加速（memory-bound 场景）</td></tr>
+</table>
+
+<h3>2.3 MQA 的理论分析</h3>
+<p>MQA 论文给出了关键的 roofline 分析：</p>
+<div class="json-block">批量推理（parallel）：
+  算术运算量：Θ(b·n·d²)
+  内存访问量：O(b·n·d + b·H·n² + d²)
+  比率（算术强度）：高 → compute-bound → MQA 无显著帮助
+
+增量解码（incremental, n=1）：
+  算术运算量：Θ(b·d²)
+  内存访问量：O(b·n·d·H + d²)  ← KV Cache 主导!
+  比率（算术强度）：极低 → memory-bound → MQA 带来 H 倍带宽减少
+
+结论：MQA 的加速仅在增量解码（自回归生成）时显著。</div>
+
+<h2>三、GQA：平衡的中间方案</h2>
+
+<h3>3.1 MQA 的问题</h3>
+<ul style="padding-left:20px; margin:10px 0;">
+  <li><strong>质量下降</strong>：所有 query head 共享同一份 K/V，表达能力受限</li>
+  <li><strong>训练不稳定</strong>：某些场景下 MQA 导致训练更不稳定</li>
+  <li><strong>已有模型不兼容</strong>：许多已训练的 MHA 模型（如 LLaMA-1、T5）无法直接转为 MQA</li>
+</ul>
+
+<h3>3.2 GQA 设计</h3>
+<div class="json-block">Grouped-Query Attention (GQA-G)：
+  将 H 个 query head 分为 G 组
+  每组共享 1 个 key head 和 1 个 value head
+
+特殊情况：
+  GQA-1 = MQA（1 组，即所有头共享）
+  GQA-H = MHA（H 组，即每头独立）
+  GQA-G（1 < G < H）= 折中方案
+
+例如 LLaMA-2 70B：
+  H = 64 query heads, G = 8 key-value groups
+  每 8 个 query head 共享 1 个 KV head
+  KV Cache 压缩比 = 64/8 = 8x</div>
+
+<h3>3.3 Uptraining：从 MHA 模型转换</h3>
+<p>GQA 论文的另一关键贡献是<strong>无需从头训练</strong>的转换方法：</p>
+<ol style="padding-left:20px; margin:10px 0;">
+  <li><strong>检查点转换</strong>：将同一组内的多个 K/V 投影矩阵取平均（mean pooling），得到该组的共享 K/V 投影</li>
+  <li><strong>少量继续预训练</strong>：在原始预训练数据上继续训练 α 比例的步数（α=5% 即足够）</li>
+</ol>
+<p>这使得已有的 MHA 大模型可以低成本转换为 GQA 模型获得推理加速。</p>
+
+<h2>四、实验结果</h2>
+
+<table>
+  <tr><th>配置</th><th>质量 (Avg Score)</th><th>推理速度</th><th>KV Cache</th></tr>
+  <tr><td>T5 XXL MHA</td><td>最高</td><td>1x（基线）</td><td>1x</td></tr>
+  <tr><td>T5 XXL → MQA (uptrained 5%)</td><td>略有下降</td><td>~最快</td><td>1/H</td></tr>
+  <tr><td>T5 XXL → GQA-8 (uptrained 5%)</td><td>接近 MHA</td><td>接近 MQA</td><td>8/H</td></tr>
+</table>
+
+<p>GQA 在质量和速度之间取得了更好的平衡：质量接近 MHA，速度接近 MQA。</p>
+
+<h2>五、关键问答</h2>
+
+<div class="qa-block">
+  <p class="question">Q1：为什么推理时 KV Cache 的带宽消耗比模型权重更关键？</p>
+  <p><strong>A</strong>：模型权重在所有 token 之间共享，可以驻留在 GPU 显存中复用。但 KV Cache 随序列长度线性增长——对于 70B 模型、8K 序列、FP16，KV Cache 可达 20+ GB。自回归解码每步仅做一个 token 的计算（算术强度极低），但需要加载整个 KV Cache 做注意力。这使得运算几乎完全受带宽限制。减少 KV Cache 大小（通过共享 K/V head）直接转化为解码速度提升。</p>
+</div>
+
+<div class="qa-block">
+  <p class="question">Q2：MQA 的质量下降来自哪里？为什么 GQA 能缓解？</p>
+  <p><strong>A</strong>：MHA 中每个 head 学习关注输入的不同方面（不同的 K/V 子空间）。MQA 强制所有 head 共享 K/V，意味着所有 head 必须在同一个 key-value 空间中找到自己需要的信息。这限制了模型的多样性——不同 head 无法"看到"输入的不同侧面。GQA 的分组方案保留了部分多样性：G 组意味着 G 个不同的 K/V 子空间，在完全共享（MQA）和完全独立（MHA）之间找到了甜点。</p>
+</div>
+
+<div class="qa-block">
+  <p class="question">Q3：为什么用 mean pooling 而非选择单个 head 或随机初始化？</p>
+  <p><strong>A</strong>：实验比较了三种 checkpoint 转换策略：(1) 随机选择组内的一个 head；(2) 随机初始化新的共享 head；(3) 对组内所有 head 做 mean pooling。Mean pooling 效果最好，原因是它保留了组内所有 head 已学习信息的"平均共识"——相当于用 ensemble 的思想初始化。选择单个 head 会丢失其他 head 的知识；随机初始化则完全抛弃已学习信息。</p>
+</div>
+
+<div class="qa-block">
+  <p class="question">Q4：GQA 的 G 值如何选择？</p>
+  <p><strong>A</strong>：G 的选择需要考虑：(1) <strong>模型规模</strong>——更大的模型（更多 head）可以承受更激进的压缩；(2) <strong>目标硬件的并行度</strong>——G 应整除 tensor parallel 的分片数，避免通信不均；(3) <strong>经验值</strong>——LLaMA-2 70B 使用 G=8（H=64），Mistral 使用 G=8（H=32）。通常 G=4~8 是常见选择，在质量损失 <1% 的前提下获得 4-8x KV Cache 压缩。</p>
+</div>
+
+<div class="qa-block">
+  <p class="question">Q5：MQA/GQA 与 FlashAttention 如何配合？</p>
+  <p><strong>A</strong>：二者优化不同维度的瓶颈。FlashAttention 优化训练和 prefill 阶段的 IO（减少 N×N 注意力矩阵的 HBM 读写）；MQA/GQA 优化自回归解码阶段的 KV Cache 带宽。二者完全正交且互补——现代 LLM 同时使用两者：用 FlashAttention 加速训练和长上下文 prefill，用 GQA 加速 token-by-token 生成。</p>
+</div>
+
+<hr class="divider">
+
+<h2>六、总结与后续影响</h2>
+
+<div class="summary-grid">
+  <div class="summary-card">
+    <h4>MQA 贡献</h4>
+    <p>首次明确识别自回归推理的内存带宽瓶颈，提出共享 K/V 的极简方案。PaLM、StarCoder 等模型直接采用。</p>
+  </div>
+  <div class="summary-card">
+    <h4>GQA 贡献</h4>
+    <p>提供了 MHA 到 MQA 的连续插值方案；提出低成本 uptraining 方法使已有模型可转换。被 LLaMA-2/3、Mistral 等采用。</p>
+  </div>
+  <div class="summary-card">
+    <h4>设计启示</h4>
+    <p>推理效率优化的关键是减少 memory-bound 阶段的数据移动量。K/V 的冗余度远高于 Q——共享 K/V 的质量损失远小于共享 Q。</p>
+  </div>
+  <div class="summary-card">
+    <h4>后续发展</h4>
+    <p>启发了 MLA（DeepSeek-V2 的低秩 KV 压缩）、KV Cache 量化、PagedAttention（vLLM）等进一步的推理优化方向。</p>
+  </div>
+</div>
+
+</body>
+</html>

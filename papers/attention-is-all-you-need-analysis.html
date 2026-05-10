@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attention Is All You Need 论文深度分析报告</title>
+<style>
+  :root { --primary: #1a365d; --accent: #2b6cb0; --bg: #ffffff; --text: #2d3748; --gray: #718096; --light: #f7fafc; --border: #e2e8f0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Source Han Serif SC", "Noto Serif CJK SC", "Georgia", serif; line-height: 1.9; color: var(--text); background: var(--bg); max-width: 900px; margin: 0 auto; padding: 40px 24px; }
+  h1 { font-size: 1.8em; color: var(--primary); border-bottom: 3px solid var(--primary); padding-bottom: 12px; margin: 40px 0 20px; }
+  h2 { font-size: 1.4em; color: var(--primary); margin: 36px 0 16px; border-left: 4px solid var(--accent); padding-left: 12px; }
+  h3 { font-size: 1.15em; color: var(--accent); margin: 28px 0 12px; }
+  h4 { font-size: 1.05em; color: #4a5568; margin: 20px 0 10px; }
+  p { margin: 10px 0; text-align: justify; }
+  .meta-box { background: var(--light); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; margin: 20px 0; }
+  .meta-box p { margin: 4px 0; font-size: 0.95em; }
+  .meta-box strong { color: var(--primary); }
+  table { border-collapse: collapse; width: 100%; margin: 16px 0; font-size: 0.92em; }
+  th, td { border: 1px solid var(--border); padding: 10px 14px; text-align: left; }
+  th { background: #edf2f7; color: var(--primary); font-weight: 600; }
+  td { line-height: 1.6; }
+  .fig-caption { text-align: center; font-size: 0.9em; color: var(--gray); margin: -12px 0 24px; font-style: italic; }
+  .highlight-box { background: #ebf8ff; border-left: 4px solid var(--accent); padding: 14px 18px; margin: 16px 0; border-radius: 0 6px 6px 0; }
+  .qa-block { background: var(--light); border-radius: 8px; padding: 18px 22px; margin: 16px 0; }
+  .qa-block .question { font-weight: 700; color: var(--primary); margin-bottom: 8px; }
+  code { background: #edf2f7; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; font-family: "SF Mono", "Fira Code", monospace; }
+  .json-block { background: #1a202c; color: #a0e8af; padding: 18px; border-radius: 8px; margin: 16px 0; overflow-x: auto; font-family: "SF Mono", monospace; font-size: 0.85em; line-height: 1.6; white-space: pre-wrap; }
+  .divider { border: none; border-top: 2px solid var(--border); margin: 40px 0; }
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+  .summary-card { background: var(--light); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .summary-card h4 { margin-top: 0; color: var(--accent); }
+  @media (max-width: 640px) { .summary-grid { grid-template-columns: 1fr; } body { padding: 16px; } }
+</style>
+</head>
+<body>
+
+<h1>Attention Is All You Need 深度分析报告</h1>
+
+<div class="meta-box">
+  <p><strong>论文标题</strong>：Attention Is All You Need</p>
+  <p><strong>论文链接</strong>：<a href="https://arxiv.org/abs/1706.03762">https://arxiv.org/abs/1706.03762</a></p>
+  <p><strong>作者团队</strong>：Ashish Vaswani*, Noam Shazeer*, Niki Parmar*, Jakob Uszkoreit*, Llion Jones*, Aidan N. Gomez*, Lukasz Kaiser*, Illia Polosukhin*</p>
+  <p><strong>关联机构</strong>：Google Brain, Google Research, University of Toronto</p>
+  <p><strong>发表会议</strong>：NeurIPS 2017 (原 NIPS)</p>
+</div>
+
+<h2>一、论文基本信息</h2>
+
+<table>
+  <tr><th style="width:20%">项目</th><th>内容</th></tr>
+  <tr><td><strong>论文题目</strong></td><td>Attention Is All You Need</td></tr>
+  <tr><td><strong>题目翻译</strong></td><td>注意力机制是你所需要的全部</td></tr>
+  <tr><td><strong>创新点</strong></td><td>提出首个完全基于注意力机制的序列转换模型（Transformer），完全移除循环和卷积结构；引入 Multi-Head Attention、Scaled Dot-Product Attention、正弦位置编码</td></tr>
+  <tr><td><strong>解决的问题</strong></td><td>RNN 的顺序计算瓶颈限制了并行化和长距离依赖学习；训练大规模序列模型的计算成本过高</td></tr>
+  <tr><td><strong>使用的方法</strong></td><td>纯注意力机制的 Encoder-Decoder 架构：Scaled Dot-Product Attention + Multi-Head Attention + Position-wise FFN + 正弦位置编码 + 残差连接 + Layer Normalization</td></tr>
+  <tr><td><strong>测试平台</strong></td><td>8x NVIDIA P100 GPU（单机）</td></tr>
+  <tr><td><strong>测试集</strong></td><td>WMT 2014 English-German（newstest2014）、WMT 2014 English-French（newstest2014）、WSJ Penn Treebank（constituency parsing）</td></tr>
+  <tr><td><strong>主要收益</strong></td><td>EN-DE 28.4 BLEU（超越所有已有模型含 ensemble 2+ BLEU）；EN-FR 41.8 BLEU（新单模型 SOTA）；训练时间从数周降至 3.5 天；计算量降低一个数量级</td></tr>
+  <tr><td><strong>主要代价</strong></td><td>Self-Attention 的 O(n&sup2;&middot;d) 复杂度使其在超长序列上计算量大于 RNN 的 O(n&middot;d&sup2;)（当 n > d 时）</td></tr>
+</table>
+
+<h4>基本信息 JSON</h4>
+<div class="json-block">{
+  "title": "Attention Is All You Need",
+  "search_terms": ["Transformer", "self-attention", "multi-head attention", "sequence transduction"],
+  "abstract": "提出完全基于注意力机制的 Transformer 架构，在机器翻译任务上达到新 SOTA，训练成本大幅降低",
+  "authors": ["Ashish Vaswani", "Noam Shazeer", "Niki Parmar", "Jakob Uszkoreit", "Llion Jones", "Aidan N. Gomez", "Lukasz Kaiser", "Illia Polosukhin"],
+  "affiliations": ["Google Brain", "Google Research", "University of Toronto"],
+  "date": "2017-06-12",
+  "venue": "NeurIPS 2017",
+  "data_source": "arXiv:1706.03762v7"
+}</div>
+
+<hr class="divider">
+
+<h2>二、摘要分析</h2>
+
+<p><strong>第一段（现状与问题）</strong>："The dominant sequence transduction models are based on complex recurrent or convolutional neural networks that include an encoder and a decoder."</p>
+
+<p>定位了研究背景：2017 年前序列建模的主流范式是 RNN/CNN + Encoder-Decoder。注意用词 "complex"——暗示这些模型的复杂性本身就是问题的一部分。</p>
+
+<p><strong>第二段（方法）</strong>："We propose a new simple network architecture, the Transformer, based solely on attention mechanisms, dispensing with recurrence and convolutions entirely."</p>
+
+<p>关键词 "simple" 和 "solely" 表明这是一次 <strong>减法式创新</strong>——不是在现有架构上叠加新模块，而是移除 RNN/CNN，仅保留注意力机制。这种设计哲学是论文最深层的贡献。</p>
+
+<p><strong>第三段（结果）</strong>：EN-DE 28.4 BLEU，EN-FR 41.8 BLEU，8 GPU 训练 3.5 天。</p>
+
+<div class="highlight-box">
+<strong>核心数据</strong>：Transformer (big) 在 EN-DE 上比此前最好的 ensemble 模型高 2+ BLEU，而训练 FLOPs 仅为 2.3&times;10<sup>19</sup>，低于 GNMT+RL ensemble 的 1.8&times;10<sup>20</sup>（约 1/8）。
+</div>
+
+<hr class="divider">
+
+<h2>三、背景与动机</h2>
+
+<div class="highlight-box">
+<strong>背景补充：RNN 与 Seq2Seq 范式</strong><br>
+RNN（Recurrent Neural Network）通过隐状态 h<sub>t</sub> = f(h<sub>t-1</sub>, x<sub>t</sub>) 逐步处理序列，每一步依赖前一步的输出。LSTM/GRU 通过门控机制缓解梯度消失，但本质上仍是顺序计算。<br><br>
+Seq2Seq（Encoder-Decoder）模型将输入序列编码为固定向量 z，解码器逐步生成输出。Bahdanau (2014) 引入注意力机制使解码器可以"回看"编码器的所有位置，大幅提升了长序列翻译质量。但注意力只是 RNN 的辅助模块，循环结构本身未被替代。
+</div>
+
+<h3>现有方法的局限性</h3>
+
+<p><strong>1. 顺序计算瓶颈</strong>：RNN 在时间步 t 的计算必须等待 t-1 完成，隐状态链 h<sub>1</sub> &rarr; h<sub>2</sub> &rarr; ... &rarr; h<sub>n</sub> 无法并行。当序列长度 n 增大时，训练时间线性增长，且无法利用 GPU 的并行计算能力。</p>
+
+<p><strong>2. 长距离依赖衰减</strong>：即使有 LSTM 的门控，信息从位置 1 到位置 n 仍需经过 O(n) 步传播。梯度在反向传播中衰减，使模型难以学习远距离依赖关系。</p>
+
+<p><strong>3. CNN 替代方案的不足</strong>：ByteNet、ConvS2S 尝试用 CNN 并行化，但卷积的局部感受野要求堆叠 O(n/k) 或 O(log<sub>k</sub>(n)) 层才能覆盖全序列，增加了网络深度和参数量。</p>
+
+<div class="highlight-box">
+<strong>核心研究问题</strong>：
+<ul>
+<li>能否设计一种完全并行的架构，使任意两个位置之间的信息路径为 O(1)？</li>
+<li>能否在移除 RNN/CNN 后，仅用注意力机制保持甚至超越翻译质量？</li>
+<li>能否大幅降低训练成本，使 SOTA 结果不再需要数周训练？</li>
+</ul>
+</div>
+
+<hr class="divider">
+
+<h2>四、方法详解</h2>
+
+<h3>4.1 整体架构：Encoder-Decoder</h3>
+
+<p>Transformer 保持了 Encoder-Decoder 的宏观结构，但内部组件全部替换：</p>
+
+<ul>
+<li><strong>Encoder</strong>：N=6 层堆叠，每层包含 Multi-Head Self-Attention + Position-wise FFN</li>
+<li><strong>Decoder</strong>：N=6 层堆叠，每层包含 Masked Multi-Head Self-Attention + Encoder-Decoder Attention + Position-wise FFN</li>
+<li>每个子层外包裹 残差连接 + LayerNorm：<code>LayerNorm(x + Sublayer(x))</code></li>
+</ul>
+
+<p><strong>设计决策</strong>：选择 6 层而非更深/更浅，是通过消融实验（Table 3 row C）确定的——2 层（23.7 BLEU）到 6 层（25.8 BLEU）有显著提升，但从 Table 3 的 big 模型看并未继续加深层数，而是加宽维度（d<sub>model</sub> 512 &rarr; 1024）。这暗示宽度比深度更重要。</p>
+
+<h3>4.2 Scaled Dot-Product Attention</h3>
+
+<p>注意力的核心公式：</p>
+
+<p style="text-align:center; font-size:1.1em; margin:16px 0;"><code>Attention(Q, K, V) = softmax(QK<sup>T</sup> / &radic;d<sub>k</sub>) V</code></p>
+
+<h4>设计动机与决策分析</h4>
+
+<p><strong>为什么选择点积而非加性注意力？</strong></p>
+<p>加性注意力（Bahdanau 2014）使用单隐藏层 MLP 计算兼容性：<code>score = v<sup>T</sup> tanh(W<sub>1</sub>q + W<sub>2</sub>k)</code>。理论复杂度相同，但实践中点积注意力可直接利用高度优化的矩阵乘法（GEMM）实现，速度更快且显存效率更高。</p>
+
+<p><strong>为什么需要 1/&radic;d<sub>k</sub> 缩放？</strong></p>
+<p>当 q 和 k 的各分量为均值 0、方差 1 的独立随机变量时，点积 q&middot;k = &Sigma;q<sub>i</sub>k<sub>i</sub> 的方差为 d<sub>k</sub>。当 d<sub>k</sub> 较大时（如 64），点积绝对值增大，softmax 输出趋近 one-hot 分布（梯度接近 0）。除以 &radic;d<sub>k</sub> 将方差归一化为 1，保持 softmax 在有效梯度区间。</p>
+
+<div class="highlight-box">
+<strong>算法原理深入</strong>：缩放因子的本质是一种 <strong>温度调节</strong>。softmax(x/T) 中温度 T = &radic;d<sub>k</sub> 防止 attention 分布过于尖锐。这与后来的很多工作（如 Flash Attention 中的数值稳定性处理）直接相关。
+</div>
+
+<h3>4.3 Multi-Head Attention</h3>
+
+<p style="text-align:center; font-size:1.05em; margin:16px 0;">
+<code>MultiHead(Q, K, V) = Concat(head<sub>1</sub>, ..., head<sub>h</sub>) W<sup>O</sup></code><br>
+<code>head<sub>i</sub> = Attention(Q W<sub>i</sub><sup>Q</sup>, K W<sub>i</sub><sup>K</sup>, V W<sub>i</sub><sup>V</sup>)</code>
+</p>
+
+<p>参数维度：W<sub>i</sub><sup>Q</sup> &isin; R<sup>d<sub>model</sub>&times;d<sub>k</sub></sup>, W<sub>i</sub><sup>K</sup> &isin; R<sup>d<sub>model</sub>&times;d<sub>k</sub></sup>, W<sub>i</sub><sup>V</sup> &isin; R<sup>d<sub>model</sub>&times;d<sub>v</sub></sup>, W<sup>O</sup> &isin; R<sup>hd<sub>v</sub>&times;d<sub>model</sub></sup></p>
+
+<h4>设计动机</h4>
+
+<p><strong>为什么需要多头？</strong></p>
+<p>单头注意力对所有信息使用同一组 Q/K/V 投影，相当于在一个"子空间"中衡量相关性。论文指出："With a single attention head, averaging inhibits this"——单头的加权平均会抑制模型同时关注不同类型关系的能力。多头让模型在不同的表示子空间中并行学习不同的注意力模式（如句法关系、指代关系、语义相似性等，见论文附录的可视化）。</p>
+
+<p><strong>为什么 h=8，d<sub>k</sub>=d<sub>v</sub>=64？</strong></p>
+<p>关键约束：<code>h &times; d<sub>k</sub> = d<sub>model</sub></code>（即 8&times;64 = 512）。这保证多头注意力的总计算量等同于单头 d<sub>model</sub> 维度的注意力。消融实验（Table 3 row A）显示：h=1 时 BLEU 降 0.9，h=16/32 时略有波动但无显著提升。h=8 是计算量恒定约束下的最优点。</p>
+
+<div class="highlight-box">
+<strong>算法原理深入</strong>：Multi-Head Attention 的数学本质是 <strong>低秩分解</strong>。将 d<sub>model</sub> 维空间分解为 h 个 d<sub>k</sub> 维子空间，各子空间独立计算注意力后拼接并混合（W<sup>O</sup>）。这比直接在 d<sub>model</sub> 维做单次注意力更具表达力——每个头可以学习不同的相关性模式，而 W<sup>O</sup> 负责融合这些不同模式的信息。
+</div>
+
+<h3>4.4 Attention 的三种应用方式</h3>
+
+<table>
+<tr><th>应用场景</th><th>Q 来源</th><th>K, V 来源</th><th>功能</th></tr>
+<tr><td>Encoder Self-Attention</td><td>前一层 Encoder 输出</td><td>同 Q</td><td>输入序列内部信息交互</td></tr>
+<tr><td>Decoder Masked Self-Attention</td><td>前一层 Decoder 输出</td><td>同 Q（带因果 mask）</td><td>已生成序列内部信息交互（禁止看到未来位置）</td></tr>
+<tr><td>Encoder-Decoder Attention</td><td>前一层 Decoder 输出</td><td>Encoder 最终输出</td><td>解码器对输入序列的选择性关注</td></tr>
+</table>
+
+<p><strong>Mask 的实现</strong>：在 softmax 之前，将非法位置的 score 设为 -&infin;，使 softmax 后这些位置的权重为 0。这保证了解码器的自回归性质——位置 i 的预测仅依赖位置 &lt; i 的已知输出。</p>
+
+<h3>4.5 Position-wise Feed-Forward Network</h3>
+
+<p style="text-align:center; font-size:1.05em; margin:16px 0;"><code>FFN(x) = max(0, xW<sub>1</sub> + b<sub>1</sub>)W<sub>2</sub> + b<sub>2</sub></code></p>
+
+<p>维度：输入/输出 d<sub>model</sub> = 512，内层 d<sub>ff</sub> = 2048（4 倍扩展）。</p>
+
+<h4>设计决策分析</h4>
+
+<p><strong>为什么需要 FFN？Attention 还不够吗？</strong></p>
+<p>Self-Attention 是一个 <strong>线性加权求和操作</strong>（softmax 后的权重与 V 做线性组合）。即使有多头，注意力本身缺少逐位置的非线性变换能力。FFN 提供两个关键功能：</p>
+<ol>
+<li><strong>非线性变换</strong>：ReLU 引入的非线性使模型能够学习位置级的特征变换</li>
+<li><strong>维度扩展</strong>：先扩展到 4 倍维度再压缩回来，类似 bottleneck 的逆操作，增大了每个位置的表示容量</li>
+</ol>
+
+<p>论文将 FFN 描述为"两个 kernel size 为 1 的卷积"——这准确揭示了其本质：独立地对每个位置做相同的变换，不引入位置间的新信息交互（信息交互全部由 Attention 负责）。</p>
+
+<div class="highlight-box">
+<strong>架构分工原则</strong>：Transformer 的设计遵循严格的分工——<br>
+&bull; <strong>Attention</strong>：负责位置间信息路由（"哪些位置相关"）<br>
+&bull; <strong>FFN</strong>：负责位置内特征变换（"对汇聚的信息做什么处理"）<br>
+这种解耦是后续所有 Transformer 变体的基本设计范式。
+</div>
+
+<h3>4.6 Positional Encoding</h3>
+
+<p>正弦/余弦位置编码公式：</p>
+<p style="text-align:center;">
+<code>PE(pos, 2i) = sin(pos / 10000<sup>2i/d<sub>model</sub></sup>)</code><br>
+<code>PE(pos, 2i+1) = cos(pos / 10000<sup>2i/d<sub>model</sub></sup>)</code>
+</p>
+
+<h4>设计决策分析</h4>
+
+<p><strong>为什么需要位置编码？</strong></p>
+<p>Self-Attention 是置换等变的（permutation equivariant）——打乱输入顺序不影响输出集合（仅影响排列顺序）。这意味着纯注意力模型对序列顺序"视而不见"。位置编码通过将位置信息叠加到词嵌入上，为模型提供位置感知能力。</p>
+
+<p><strong>为什么选择正弦函数而非可学习位置嵌入？</strong></p>
+<ol>
+<li><strong>外推能力</strong>：正弦编码基于连续函数，理论上可外推到训练时未见过的更长序列；可学习嵌入仅能覆盖训练时的最大长度</li>
+<li><strong>相对位置可表示性</strong>：对任意固定偏移 k，PE<sub>pos+k</sub> 可表示为 PE<sub>pos</sub> 的线性函数（旋转变换），使模型能学习相对位置关系</li>
+<li><strong>消融结果</strong>：Table 3 row (E) 显示可学习位置嵌入结果几乎一致（25.7 vs 25.8 BLEU），正弦版本被选择是因为外推潜力</li>
+</ol>
+
+<div class="highlight-box">
+<strong>算法原理深入</strong>：正弦位置编码的本质是将整数位置映射到 d<sub>model</sub>/2 个不同频率的正弦波上。低维度对应高频波（区分相邻位置），高维度对应低频波（编码全局位置）。这构成了一种 <strong>多尺度位置表示</strong>。PE<sub>pos+k</sub> = R<sub>k</sub> &middot; PE<sub>pos</sub>（R<sub>k</sub> 为旋转矩阵）的性质后来被 RoPE（2021）显式利用并发扬。
+</div>
+
+<h3>4.7 残差连接与 Layer Normalization</h3>
+
+<p>每个子层的输出：<code>LayerNorm(x + Sublayer(x))</code></p>
+
+<p><strong>设计决策</strong>：</p>
+<ul>
+<li><strong>残差连接</strong>（He et al., 2016）：确保梯度可以不经任何变换直接回传到底层，解决深层网络的退化问题。约束条件：所有子层输出维度必须等于 d<sub>model</sub> = 512</li>
+<li><strong>Layer Normalization</strong>（Ba et al., 2016）而非 Batch Normalization：LayerNorm 在特征维度上归一化（不依赖 batch 中其他样本），更适合序列长度可变的场景</li>
+</ul>
+
+<hr class="divider">
+
+<h2>五、实验设置</h2>
+
+<h3>数据集</h3>
+<table>
+<tr><th>任务</th><th>数据集</th><th>规模</th><th>词表</th></tr>
+<tr><td>EN-DE 翻译</td><td>WMT 2014 English-German</td><td>450 万句对</td><td>BPE，37000 tokens（共享源-目标）</td></tr>
+<tr><td>EN-FR 翻译</td><td>WMT 2014 English-French</td><td>3600 万句对</td><td>Word-piece，32000 tokens</td></tr>
+<tr><td>句法分析</td><td>WSJ Penn Treebank</td><td>4 万训练句 + 1700 万半监督</td><td>16K/32K tokens</td></tr>
+</table>
+
+<h3>模型配置</h3>
+<table>
+<tr><th>配置</th><th>N</th><th>d<sub>model</sub></th><th>d<sub>ff</sub></th><th>h</th><th>d<sub>k</sub></th><th>P<sub>drop</sub></th><th>参数量</th></tr>
+<tr><td>base</td><td>6</td><td>512</td><td>2048</td><td>8</td><td>64</td><td>0.1</td><td>65M</td></tr>
+<tr><td>big</td><td>6</td><td>1024</td><td>4096</td><td>16</td><td>64</td><td>0.3</td><td>213M</td></tr>
+</table>
+
+<h3>训练细节</h3>
+<ul>
+<li><strong>优化器</strong>：Adam（&beta;<sub>1</sub>=0.9, &beta;<sub>2</sub>=0.98, &epsilon;=10<sup>-9</sup>）</li>
+<li><strong>学习率调度</strong>：<code>lr = d<sub>model</sub><sup>-0.5</sup> &middot; min(step<sup>-0.5</sup>, step &middot; warmup<sup>-1.5</sup>)</code>，warmup=4000 步</li>
+<li><strong>正则化</strong>：Residual Dropout（P<sub>drop</sub>=0.1）、Label Smoothing（&epsilon;<sub>ls</sub>=0.1）</li>
+<li><strong>解码</strong>：Beam Search（beam=4，length penalty &alpha;=0.6），checkpoint 平均（base: last 5, big: last 20）</li>
+</ul>
+
+<hr class="divider">
+
+<h2>六、实验结果与分析</h2>
+
+<h3>6.1 主实验：机器翻译</h3>
+
+<table>
+<tr><th>模型</th><th>EN-DE BLEU</th><th>EN-FR BLEU</th><th>训练 FLOPs</th></tr>
+<tr><td>GNMT + RL Ensemble</td><td>26.30</td><td>41.16</td><td>1.8&times;10<sup>20</sup></td></tr>
+<tr><td>ConvS2S Ensemble</td><td>26.36</td><td>41.29</td><td>7.7&times;10<sup>19</sup></td></tr>
+<tr><td>MoE</td><td>26.03</td><td>40.56</td><td>2.0&times;10<sup>19</sup></td></tr>
+<tr><td><strong>Transformer (base)</strong></td><td><strong>27.3</strong></td><td>38.1</td><td>3.3&times;10<sup>18</sup></td></tr>
+<tr><td><strong>Transformer (big)</strong></td><td><strong>28.4</strong></td><td><strong>41.8</strong></td><td>2.3&times;10<sup>19</sup></td></tr>
+</table>
+
+<p><strong>关键观察</strong>：</p>
+<ul>
+<li>Transformer base 以 <strong>1/6 的计算量</strong> 超越了所有单模型和大部分 ensemble</li>
+<li>Transformer big 的计算量与 MoE 相当（同一数量级），但 BLEU 高出 2.4（EN-DE）</li>
+<li>训练效率提升的根本原因：Self-Attention 的完全并行化消除了 RNN 的顺序等待开销</li>
+</ul>
+
+<h3>6.2 消融实验（Table 3）</h3>
+
+<table>
+<tr><th>变量</th><th>变化</th><th>BLEU 影响</th><th>结论</th></tr>
+<tr><td>注意力头数 h</td><td>1 &rarr; 8 &rarr; 32</td><td>24.9 &rarr; 25.8 &rarr; 25.4</td><td>h=8 最优；单头显著劣化；过多头也有轻微下降</td></tr>
+<tr><td>d<sub>k</sub> 维度</td><td>16 vs 32 vs 64</td><td>25.1 &rarr; 25.4 &rarr; 25.8</td><td>d<sub>k</sub> 越大越好——"确定兼容性不是一件容易的事"</td></tr>
+<tr><td>模型维度</td><td>d<sub>model</sub> 256 &rarr; 1024</td><td>24.5 &rarr; 26.0</td><td>更宽的模型更好（参数量 28M &rarr; 168M）</td></tr>
+<tr><td>d<sub>ff</sub></td><td>1024 &rarr; 4096</td><td>25.4 &rarr; 26.2</td><td>FFN 内层维度的扩展有明确收益</td></tr>
+<tr><td>Dropout</td><td>0.0 vs 0.1 vs 0.2</td><td>24.6 / 25.8 / 25.5</td><td>适量 dropout 必要；过多反而损害</td></tr>
+<tr><td>位置编码</td><td>正弦 vs 可学习</td><td>25.8 vs 25.7</td><td>几乎无差异</td></tr>
+</table>
+
+<h3>6.3 泛化能力：English Constituency Parsing</h3>
+
+<p>4 层 Transformer（d<sub>model</sub>=1024）直接迁移翻译模型的超参数到句法分析任务：</p>
+<ul>
+<li>仅 WSJ 训练（40K 句）：F1 = 91.3，超越大部分判别式模型</li>
+<li>半监督设置（17M 句）：F1 = 92.7，新 SOTA</li>
+</ul>
+<p>这证明 Transformer 不是专用于翻译的架构，而是一种通用的序列建模方案。</p>
+
+<hr class="divider">
+
+<h2>七、关键问题与回答</h2>
+
+<div class="qa-block">
+<p class="question">Q1: 为什么 Self-Attention 能替代 RNN？它在序列建模中缺失了什么，又如何弥补？</p>
+<p>Self-Attention 的核心优势在于 O(1) 的最大路径长度——序列中任意两个位置可以直接交互，无需像 RNN 那样经过 O(n) 步传递。这直接解决了长距离依赖学习困难的问题。</p>
+<p>缺失的是 <strong>位置感知</strong>（Self-Attention 是置换等变的）和 <strong>逐位置非线性变换</strong>（Attention 本质是线性加权和）。前者通过 Positional Encoding 弥补，后者通过 FFN 弥补。三者组合构成完整的序列建模能力。</p>
+</div>
+
+<div class="qa-block">
+<p class="question">Q2: Multi-Head 为什么比 Single-Head 好？多头的数学本质是什么？</p>
+<p>单头注意力在整个 d<sub>model</sub> 空间中计算一组权重，相当于对所有信息维度施加同一套"相关性标准"。多头将空间分解为 h 个低维子空间，每个子空间可以学习不同类型的相关性模式。</p>
+<p>数学上，这等价于：允许注意力权重矩阵具有 <strong>多组</strong> 低秩近似，而非单一的满秩近似。最终的 W<sup>O</sup> 投影负责将不同子空间的信息融合。消融实验证实 h=1 时 BLEU 降 0.9，但 h 也不是越大越好（h=32 时 d<sub>k</sub>=16，单头维度过低导致表达力不足）。</p>
+</div>
+
+<div class="qa-block">
+<p class="question">Q3: 缩放因子 1/&radic;d<sub>k</sub> 的物理意义是什么？没有它会怎样？</p>
+<p>当 d<sub>k</sub> 较大时，Q&middot;K 点积的方差为 d<sub>k</sub>，即点积值的标准差为 &radic;d<sub>k</sub>。大方差导致 softmax 输入的绝对值过大，使 softmax 输出逼近 one-hot（一个位置权重接近 1，其余接近 0）。此时梯度几乎为 0，训练停滞。</p>
+<p>除以 &radic;d<sub>k</sub> 将点积方差归一化为 1，确保 softmax 在信息富集区间工作。论文提到 d<sub>k</sub> 较小时加性注意力和点积注意力表现类似，只有在 d<sub>k</sub> 较大时缩放才变得关键——这与上述分析完全一致。</p>
+</div>
+
+<div class="qa-block">
+<p class="question">Q4: FFN 的 4 倍扩展比（d<sub>ff</sub> = 4 &times; d<sub>model</sub>）有什么依据？</p>
+<p>论文未给出理论推导，但消融实验显示 d<sub>ff</sub> 从 1024 到 4096 带来 0.8 BLEU 提升。4 倍扩展的直觉是：注意力层负责信息路由（低维投影即可），FFN 负责特征变换（需要更大的中间空间来编码复杂映射）。</p>
+<p>后续研究表明 FFN 的行为类似"键值记忆"（Geva et al., 2021）：第一层 W<sub>1</sub> 的行向量为"键"匹配输入模式，第二层 W<sub>2</sub> 的列向量为"值"输出对应特征。4 倍扩展意味着每层有 2048 个这样的"记忆槽位"。</p>
+</div>
+
+<div class="qa-block">
+<p class="question">Q5: 正弦位置编码如何表示相对位置？为什么后来被 RoPE 等方案替代？</p>
+<p>正弦编码的关键性质：对任意偏移 k，存在线性变换矩阵 M<sub>k</sub> 使得 PE<sub>pos+k</sub> = M<sub>k</sub> &middot; PE<sub>pos</sub>。这使模型理论上能通过学习 Q/K 的投影矩阵来隐式利用相对位置。</p>
+<p>局限性：相对位置信息是"隐式"的——模型需要自己从 Q&middot;K 点积中解码出位置关系。RoPE（Su et al., 2021）将旋转矩阵直接应用于 Q/K 向量，使点积天然包含相对位置衰减，是对正弦编码思想的显式化和强化。另一个局限是外推能力在实践中并不如预期（NTK-aware scaling 等后续工作试图修复此问题）。</p>
+</div>
+
+<div class="qa-block">
+<p class="question">Q6: Transformer 的计算瓶颈在哪里？为什么后来催生了 Flash Attention 等优化？</p>
+<p>Self-Attention 的复杂度为 O(n&sup2;&middot;d)——对每对位置计算点积。当序列长度 n 增大时：</p>
+<ul>
+<li><strong>计算量</strong>：QK<sup>T</sup> 矩阵乘法为 O(n&sup2;&middot;d<sub>k</sub>)，softmax 后与 V 相乘又是 O(n&sup2;&middot;d<sub>v</sub>)</li>
+<li><strong>显存</strong>：注意力矩阵 softmax(QK<sup>T</sup>/&radic;d<sub>k</sub>) 大小为 n&times;n，在 n=4096 时已占 64MB（FP32）</li>
+</ul>
+<p>论文中 n 较短（翻译句子几十到几百 token），问题不突出。但 LLM 时代序列长度 n=2048~128K，注意力矩阵成为显存和访存的核心瓶颈。Flash Attention (Dao, 2022) 通过 IO-aware 的分块计算避免存储完整注意力矩阵，是对该瓶颈的直接回应。</p>
+</div>
+
+<div class="qa-block">
+<p class="question">Q7: Warmup 学习率调度的设计逻辑是什么？</p>
+<p>公式 <code>lr = d<sub>model</sub><sup>-0.5</sup> &middot; min(step<sup>-0.5</sup>, step &middot; warmup<sup>-1.5</sup>)</code> 分两个阶段：</p>
+<ul>
+<li><strong>前 4000 步线性增长</strong>：模型参数随机初始化，梯度方向不稳定。小学习率避免早期大幅震荡</li>
+<li><strong>之后按 step<sup>-0.5</sup> 衰减</strong>：模型逐渐收敛，需要更精细的参数调整</li>
+</ul>
+<p>d<sub>model</sub><sup>-0.5</sup> 前缀使学习率与模型宽度成反比——更宽的模型梯度更稳定，需要更小的步长。这一调度策略后来演变为各种变体（cosine decay、WSD 等），但 warmup 思想被普遍保留。</p>
+</div>
+
+<div class="qa-block">
+<p class="question">Q8: Label Smoothing 为什么"损害困惑度但提升 BLEU"？</p>
+<p>标准交叉熵损失要求模型对正确 token 给出概率 1.0。Label Smoothing（&epsilon;=0.1）将目标分布从 one-hot 变为 (1-&epsilon;) 集中在正确 token + &epsilon;/(V-1) 均匀分布在其余 token。</p>
+<p>这使模型的预测分布更"不确定"，困惑度（衡量预测分布尖锐程度）数值上升。但翻译任务中，beam search 只关心 top-k 排序而非精确概率值，更平滑的分布意味着模型不会过于依赖单一翻译，提供了更好的候选多样性，最终提升 BLEU。</p>
+</div>
+
+<hr class="divider">
+
+<h2>八、总结</h2>
+
+<div class="summary-grid">
+  <div class="summary-card">
+    <h4>背景</h4>
+    <p>2017 年序列建模被 RNN/CNN 主导，训练效率低下，长距离依赖学习困难，SOTA 需要数周训练和模型集成。</p>
+  </div>
+  <div class="summary-card">
+    <h4>问题</h4>
+    <p>RNN 的顺序计算无法并行化，O(n) 路径长度限制长距离依赖学习，训练成本高昂。</p>
+  </div>
+  <div class="summary-card">
+    <h4>解决办法</h4>
+    <p>完全移除 RNN/CNN，仅用 Self-Attention + FFN + Positional Encoding 构建 Encoder-Decoder 架构（Transformer）。</p>
+  </div>
+  <div class="summary-card">
+    <h4>创新性</h4>
+    <p>首次证明纯注意力机制足以进行高质量序列转换；Multi-Head Attention 和 Scaled Dot-Product 成为后续所有 LLM 的基础组件。</p>
+  </div>
+  <div class="summary-card">
+    <h4>效果</h4>
+    <p>EN-DE 28.4 / EN-FR 41.8 BLEU（超越所有 ensemble），训练成本降低约 10 倍，泛化到句法分析任务。</p>
+  </div>
+  <div class="summary-card">
+    <h4>缺陷与局限</h4>
+    <p>O(n&sup2;) 注意力复杂度在长序列上不可持续；正弦位置编码的外推能力有限；未探索超长文本和非文本模态。</p>
+  </div>
+</div>
+
+<hr class="divider">
+<p style="text-align:center; color:var(--gray); font-size:0.85em; margin-top:40px;">
+  Attention Is All You Need 论文深度分析报告
+</p>
+
+</body>
+</html>
