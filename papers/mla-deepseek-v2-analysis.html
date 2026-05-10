@@ -29,9 +29,14 @@
   .summary-card { background: var(--light); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
   .summary-card h4 { margin-top: 0; color: var(--accent); }
   @media (max-width: 640px) { .summary-grid { grid-template-columns: 1fr; } body { padding: 16px; } }
+    .report-nav { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif; font-size: 0.88em; padding: 12px 0; margin-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .report-nav a { color: var(--accent); text-decoration: none; transition: color 0.3s; }
+    .report-nav a:hover { color: var(--primary); }
 </style>
 </head>
 <body>
+
+<nav class="report-nav"><a href="/knowledge/llm-landscape/">&larr; 返回 大语言模型全景</a></nav>
 
 <h1>MLA (Multi-head Latent Attention) 深度分析报告</h1>
 
@@ -199,6 +204,8 @@ q_t^C = W^{UQ} · c_t^Q      ← 上投影：d'_c → n_h × d_h</div>
     <p>MLA 被 DeepSeek-V3、DeepSeek-R1 继续使用；启发了学术界对注意力机制低秩性质的进一步研究；为下一代模型架构设计提供了新方向——压缩而非共享。</p>
   </div>
 </div>
+
+<nav class="report-nav" style="margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border); border-bottom: none;"><a href="/knowledge/llm-landscape/">&larr; 返回 大语言模型全景</a></nav>
 
 </body>
 </html>

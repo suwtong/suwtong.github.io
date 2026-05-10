@@ -30,9 +30,14 @@
   .summary-card { background: var(--light); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
   .summary-card h4 { margin-top: 0; color: var(--accent); }
   @media (max-width: 640px) { .summary-grid { grid-template-columns: 1fr; } body { padding: 16px; } }
+    .report-nav { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif; font-size: 0.88em; padding: 12px 0; margin-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .report-nav a { color: var(--accent); text-decoration: none; transition: color 0.3s; }
+    .report-nav a:hover { color: var(--primary); }
 </style>
 </head>
 <body>
+
+<nav class="report-nav"><a href="/knowledge/llm-landscape/">&larr; 返回 大语言模型全景</a></nav>
 
 <h1>GRPO (Group Relative Policy Optimization) 深度分析报告</h1>
 
@@ -234,6 +239,8 @@ Advantage：A_hat_{i,t} = Σ_{index(j) >= t} r_tilde^{index(j)}_i
     <p>GRPO 被 DeepSeek-R1、DeepSeek-V2.5 等直接采用；启发了其他无 value model 的 RL 算法；证明了数学推理是 RL for LLM 的理想测试场景。</p>
   </div>
 </div>
+
+<nav class="report-nav" style="margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border); border-bottom: none;"><a href="/knowledge/llm-landscape/">&larr; 返回 大语言模型全景</a></nav>
 
 </body>
 </html>

@@ -30,9 +30,14 @@
   .summary-card { background: var(--light); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
   .summary-card h4 { margin-top: 0; color: var(--accent); }
   @media (max-width: 640px) { .summary-grid { grid-template-columns: 1fr; } body { padding: 16px; } }
+    .report-nav { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif; font-size: 0.88em; padding: 12px 0; margin-bottom: 12px; border-bottom: 1px solid var(--border); }
+    .report-nav a { color: var(--accent); text-decoration: none; transition: color 0.3s; }
+    .report-nav a:hover { color: var(--primary); }
 </style>
 </head>
 <body>
+
+<nav class="report-nav"><a href="/knowledge/llm-landscape/">&larr; 返回 大语言模型全景</a></nav>
 
 <h1>Sparsely-Gated Mixture-of-Experts 深度分析报告</h1>
 
@@ -210,6 +215,8 @@
 
 <hr class="divider">
 <p style="text-align:center; color:var(--gray); font-size:0.85em; margin-top:40px;">Sparsely-Gated Mixture-of-Experts 论文深度分析报告</p>
+
+<nav class="report-nav" style="margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--border); border-bottom: none;"><a href="/knowledge/llm-landscape/">&larr; 返回 大语言模型全景</a></nav>
 
 </body>
 </html>
