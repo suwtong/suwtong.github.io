@@ -1,0 +1,400 @@
+---
+title: "大语言模型全景：从产品到底层框架"
+date: 2025-05-10
+tags: [LLM, AI, 架构, 综述]
+layout: default
+---
+<style>
+.llm-article { max-width: 100%; }
+.llm-article h2 { margin-top: 2.5em; margin-bottom: 0.6em; font-size: 1.4rem; color: #2c4a6e; border-bottom: 2px solid rgba(74,138,181,0.2); padding-bottom: 8px; }
+.llm-article h3 { margin-top: 1.8em; margin-bottom: 0.5em; font-size: 1.1rem; color: #3a5a7a; }
+
+.stack-diagram { background: #f0f5fa; border-radius: 12px; padding: 20px; margin: 24px 0; border: 1px solid rgba(74,138,181,0.12); }
+.stack-row { display: flex; align-items: stretch; margin: 6px 0; gap: 8px; }
+.stack-label { width: 100px; flex-shrink: 0; display: flex; align-items: center; font-size: 0.78rem; color: #5a7a9a; font-weight: 500; }
+.stack-items { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 12px; background: white; border-radius: 6px; border-left: 3px solid #7bafd4; }
+.stack-items.layer-product { border-left-color: #e67e22; }
+.stack-items.layer-infra { border-left-color: #27ae60; }
+.stack-items.layer-hw { border-left-color: #8e44ad; }
+.stack-chip { font-size: 0.75rem; background: rgba(74,138,181,0.08); padding: 2px 8px; border-radius: 10px; color: #2c4a6e; white-space: nowrap; }
+
+.info-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.85rem; }
+.info-table th { background: #f0f5fa; padding: 10px 12px; text-align: left; font-weight: 500; color: #2c4a6e; border-bottom: 2px solid rgba(74,138,181,0.15); }
+.info-table td { padding: 10px 12px; border-bottom: 1px solid rgba(44,74,110,0.06); vertical-align: top; }
+.info-table tr:hover { background: rgba(123,175,212,0.04); }
+
+.tag-open { display: inline-block; background: #e8f5e9; color: #2e7d32; padding: 1px 8px; border-radius: 10px; font-size: 0.72rem; font-weight: 500; }
+.tag-closed { display: inline-block; background: #fce4ec; color: #c62828; padding: 1px 8px; border-radius: 10px; font-size: 0.72rem; font-weight: 500; }
+.tag-partial { display: inline-block; background: #fff3e0; color: #e65100; padding: 1px 8px; border-radius: 10px; font-size: 0.72rem; font-weight: 500; }
+
+.note-block { background: #f8fafe; border-radius: 8px; padding: 14px 18px; margin: 16px 0; border: 1px solid rgba(74,138,181,0.1); font-size: 0.85rem; line-height: 1.7; color: #3a5a7a; }
+</style>
+
+<article class="llm-article">
+
+<div class="stack-diagram">
+  <div class="stack-row">
+    <div class="stack-label">产品/应用</div>
+    <div class="stack-items layer-product">
+      <span class="stack-chip">ChatGPT</span>
+      <span class="stack-chip">Claude</span>
+      <span class="stack-chip">Gemini</span>
+      <span class="stack-chip">豆包</span>
+      <span class="stack-chip">Kimi</span>
+      <span class="stack-chip">DeepSeek</span>
+      <span class="stack-chip">Codex</span>
+      <span class="stack-chip">Claude Code</span>
+      <span class="stack-chip">Cursor</span>
+      <span class="stack-chip">Copilot</span>
+    </div>
+  </div>
+  <div class="stack-row">
+    <div class="stack-label">模型</div>
+    <div class="stack-items">
+      <span class="stack-chip">GPT-5</span>
+      <span class="stack-chip">Claude 4</span>
+      <span class="stack-chip">Gemini 3</span>
+      <span class="stack-chip">Llama 4</span>
+      <span class="stack-chip">DeepSeek-V3/R1</span>
+      <span class="stack-chip">Qwen3</span>
+      <span class="stack-chip">Mistral</span>
+      <span class="stack-chip">GLM-4</span>
+    </div>
+  </div>
+  <div class="stack-row">
+    <div class="stack-label">训练/对齐</div>
+    <div class="stack-items">
+      <span class="stack-chip">Megatron-LM</span>
+      <span class="stack-chip">DeepSpeed</span>
+      <span class="stack-chip">FSDP</span>
+      <span class="stack-chip">HF Transformers</span>
+      <span class="stack-chip">veRL</span>
+      <span class="stack-chip">OpenRLHF</span>
+    </div>
+  </div>
+  <div class="stack-row">
+    <div class="stack-label">推理服务</div>
+    <div class="stack-items layer-infra">
+      <span class="stack-chip">vLLM</span>
+      <span class="stack-chip">SGLang</span>
+      <span class="stack-chip">TensorRT-LLM</span>
+      <span class="stack-chip">llama.cpp</span>
+      <span class="stack-chip">TGI</span>
+      <span class="stack-chip">Ollama</span>
+    </div>
+  </div>
+  <div class="stack-row">
+    <div class="stack-label">算子/硬件</div>
+    <div class="stack-items layer-hw">
+      <span class="stack-chip">Flash Attention</span>
+      <span class="stack-chip">CUTLASS</span>
+      <span class="stack-chip">Triton</span>
+      <span class="stack-chip">NCCL</span>
+      <span class="stack-chip">CUDA</span>
+      <span class="stack-chip">H100/H200/B200</span>
+    </div>
+  </div>
+</div>
+
+<h2>模型层</h2>
+
+<h3>海外</h3>
+
+<table class="info-table">
+<tr><th>公司</th><th>模型</th><th>参数/架构</th><th>开源</th><th>差异化能力</th></tr>
+<tr>
+  <td><strong>OpenAI</strong></td>
+  <td>GPT-5、GPT-4o、o3</td>
+  <td>未公开，推测 MoE</td>
+  <td><span class="tag-closed">闭源</span></td>
+  <td>多模态最全面、推理链（o 系列）</td>
+</tr>
+<tr>
+  <td><strong>Anthropic</strong></td>
+  <td>Claude Opus 4、Sonnet 4</td>
+  <td>未公开，Dense</td>
+  <td><span class="tag-closed">闭源</span></td>
+  <td>200K 上下文、编码评测最高分</td>
+</tr>
+<tr>
+  <td><strong>Google</strong></td>
+  <td>Gemini 2.5/3.1 Pro</td>
+  <td>未公开，MoE，内置思维链</td>
+  <td><span class="tag-partial">Gemma 开源</span></td>
+  <td>原生多模态、搜索增强、TPU 训练</td>
+</tr>
+<tr>
+  <td><strong>Meta</strong></td>
+  <td>Llama 4 Scout (109B/17B)<br>Llama 4 Maverick (400B/17B)</td>
+  <td>MoE，首次引入</td>
+  <td><span class="tag-open">开放权重</span></td>
+  <td>开源生态位垄断</td>
+</tr>
+<tr>
+  <td><strong>Mistral AI</strong></td>
+  <td>Mistral Large、Codestral</td>
+  <td>MoE (Mixtral)，Dense (Large)</td>
+  <td><span class="tag-partial">部分开源</span></td>
+  <td>欧洲合规、代码模型</td>
+</tr>
+<tr>
+  <td><strong>xAI</strong></td>
+  <td>Grok-3</td>
+  <td>未公开</td>
+  <td><span class="tag-closed">闭源</span></td>
+  <td>X 平台实时数据接入</td>
+</tr>
+</table>
+
+<h3>国内</h3>
+
+<table class="info-table">
+<tr><th>公司</th><th>模型</th><th>参数/架构</th><th>开源</th><th>差异化能力</th></tr>
+<tr>
+  <td><strong>DeepSeek</strong><br>（幻方量化）</td>
+  <td>V3、R1</td>
+  <td>MoE 671B/37B 激活；MLA + FP8 训练</td>
+  <td><span class="tag-open">MIT</span></td>
+  <td>训练成本 $5.5M，架构完全公开；R1 推理能力对标 o1</td>
+</tr>
+<tr>
+  <td><strong>阿里</strong></td>
+  <td>Qwen3、Qwen3.5</td>
+  <td>Dense + MoE 双线；全模态</td>
+  <td><span class="tag-open">Apache 2.0</span></td>
+  <td>模型族最全（文本/视觉/音频/代码），国内开源数量最大</td>
+</tr>
+<tr>
+  <td><strong>字节</strong></td>
+  <td>豆包大模型</td>
+  <td>未公开</td>
+  <td><span class="tag-closed">闭源</span></td>
+  <td>C 端用户量（抖音+飞书分发）</td>
+</tr>
+<tr>
+  <td><strong>百度</strong></td>
+  <td>ERNIE 4.5</td>
+  <td>未公开</td>
+  <td><span class="tag-closed">闭源</span></td>
+  <td>搜索场景集成、千帆企业平台</td>
+</tr>
+<tr>
+  <td><strong>智谱 AI</strong></td>
+  <td>GLM-4</td>
+  <td>Dense，双语</td>
+  <td><span class="tag-partial">部分开源</span></td>
+  <td>学术背景（清华系），Agent 能力</td>
+</tr>
+<tr>
+  <td><strong>月之暗面</strong></td>
+  <td>Kimi-K2</td>
+  <td>未公开，长上下文优化</td>
+  <td><span class="tag-closed">闭源</span></td>
+  <td>200 万 token 上下文</td>
+</tr>
+<tr>
+  <td><strong>腾讯</strong></td>
+  <td>混元 3.0</td>
+  <td>MoE</td>
+  <td><span class="tag-partial">部分开源</span></td>
+  <td>微信/企业微信生态</td>
+</tr>
+</table>
+
+<h2>产品层</h2>
+
+<h3>通用对话产品</h3>
+
+<table class="info-table">
+<tr><th>产品</th><th>所属</th><th>模型来源</th><th>付费模式</th><th>月活量级</th></tr>
+<tr><td>ChatGPT</td><td>OpenAI</td><td>GPT-4o / GPT-5 / o3</td><td>免费+$20/月 Plus</td><td>数亿</td></tr>
+<tr><td>Claude</td><td>Anthropic</td><td>Claude Sonnet/Opus 4</td><td>免费+$20/月 Pro</td><td>千万级</td></tr>
+<tr><td>Gemini</td><td>Google</td><td>Gemini Pro/Ultra</td><td>免费+$20/月 Advanced</td><td>数亿（含搜索集成）</td></tr>
+<tr><td>豆包</td><td>字节</td><td>豆包大模型</td><td>免费</td><td>亿级（国内 C 端第一梯队）</td></tr>
+<tr><td>Kimi</td><td>月之暗面</td><td>Kimi-K2</td><td>免费+付费</td><td>千万级</td></tr>
+<tr><td>DeepSeek</td><td>深度求索</td><td>DeepSeek-V3/R1</td><td>免费 + 极低价 API</td><td>千万级</td></tr>
+<tr><td>通义千问</td><td>阿里</td><td>Qwen3</td><td>免费+企业付费</td><td>千万级</td></tr>
+</table>
+
+<h3>AI 编程工具</h3>
+
+<table class="info-table">
+<tr><th>产品</th><th>所属</th><th>模型来源</th><th>形态</th><th>定价</th></tr>
+<tr><td>Codex</td><td>OpenAI</td><td>GPT-5.3-Codex</td><td>云端异步智能体</td><td>按 token 计费</td></tr>
+<tr><td>Claude Code</td><td>Anthropic</td><td>Claude Opus 4</td><td>终端 CLI</td><td>按 token 计费</td></tr>
+<tr><td>Cursor</td><td>Anysphere</td><td>Claude/GPT 可选</td><td>IDE（VS Code fork）</td><td>$20/月 Pro</td></tr>
+<tr><td>GitHub Copilot</td><td>微软/GitHub</td><td>GPT-4o/Codex</td><td>IDE 插件</td><td>$10-39/月</td></tr>
+<tr><td>Qoder</td><td>Qoder</td><td>多模型后端</td><td>终端 CLI</td><td>订阅制</td></tr>
+<tr><td>Windsurf</td><td>Codeium</td><td>自研 + Claude/GPT</td><td>IDE</td><td>免费+$15/月 Pro</td></tr>
+</table>
+
+<h2>开源生态与分发</h2>
+
+<table class="info-table">
+<tr><th>平台/工具</th><th>角色</th><th>内容</th></tr>
+<tr><td><strong><a href="https://huggingface.co" target="_blank">Hugging Face Hub</a></strong></td><td>模型/数据集分发中心</td><td>几乎所有开源模型权重托管于此（Llama、Qwen、DeepSeek、Mistral 等）</td></tr>
+<tr><td><strong>GitHub</strong></td><td>代码与训练脚本</td><td>模型实现、推理代码、论文复现</td></tr>
+<tr><td><strong><a href="https://github.com/huggingface/transformers" target="_blank">HF Transformers</a></strong></td><td>Python 库</td><td>统一的模型加载/推理/微调接口，事实标准</td></tr>
+<tr><td><strong><a href="https://github.com/ggerganov/llama.cpp" target="_blank">GGUF (llama.cpp)</a></strong></td><td>量化格式</td><td>本地部署的模型权重格式标准</td></tr>
+</table>
+
+<div class="note-block">
+主流开源模式：GitHub 发代码 + HF Hub 发权重 + 技术报告/论文公开架构细节。<br>
+许可证分布：DeepSeek MIT（最宽松）、Qwen Apache 2.0（宽松）、Llama 自定义（有商用限制阈值）、Mistral Apache 2.0（小模型）。
+</div>
+
+<h2>训练框架层</h2>
+
+<table class="info-table">
+<tr><th>框架</th><th>维护方</th><th>并行策略</th><th>开源</th><th>使用者</th></tr>
+<tr>
+  <td><strong><a href="https://github.com/NVIDIA/Megatron-LM" target="_blank">Megatron-LM</a></strong></td>
+  <td>NVIDIA</td>
+  <td>TP + PP + SP + EP（专家并行）</td>
+  <td><span class="tag-open">开源</span></td>
+  <td>DeepSeek（魔改版）、阿里、大多数预训练团队</td>
+</tr>
+<tr>
+  <td><strong><a href="https://github.com/microsoft/DeepSpeed" target="_blank">DeepSpeed</a></strong></td>
+  <td>微软</td>
+  <td>ZeRO-1/2/3（显存分片）、Offload</td>
+  <td><span class="tag-open">开源</span></td>
+  <td>中小团队微调、配合 Megatron 做预训练</td>
+</tr>
+<tr>
+  <td><strong><a href="https://github.com/pytorch/pytorch" target="_blank">PyTorch FSDP2</a></strong></td>
+  <td>Meta/PyTorch</td>
+  <td>全分片数据并行</td>
+  <td><span class="tag-open">开源</span></td>
+  <td>Meta 内部、Llama 训练</td>
+</tr>
+<tr>
+  <td><strong><a href="https://github.com/microsoft/Megatron-DeepSpeed" target="_blank">Megatron-DeepSpeed</a></strong></td>
+  <td>微软+NVIDIA</td>
+  <td>合并 Megatron 并行 + ZeRO 优化</td>
+  <td><span class="tag-open">开源</span></td>
+  <td>超大规模预训练</td>
+</tr>
+<tr>
+  <td><strong><a href="https://github.com/volcengine/verl" target="_blank">veRL</a></strong></td>
+  <td>社区 (Bytedance 主导)</td>
+  <td>RL 对齐训练（PPO/GRPO）</td>
+  <td><span class="tag-open">开源</span></td>
+  <td>RLHF/RLAIF post-training 阶段</td>
+</tr>
+<tr>
+  <td><strong><a href="https://github.com/OpenRLHF/OpenRLHF" target="_blank">OpenRLHF</a></strong></td>
+  <td>社区</td>
+  <td>RL 对齐训练</td>
+  <td><span class="tag-open">开源</span></td>
+  <td>学术界、中小团队对齐训练</td>
+</tr>
+</table>
+
+<div class="note-block">
+DeepSeek V3 训练技术栈公开信息：自研 HAI-LLM 框架（基于 Megatron 深度改造）、FP8 混合精度训练（业界首次大规模验证）、辅助损失无关的 MoE 负载均衡。
+</div>
+
+<h3>关键算法与技术来源</h3>
+
+<table class="info-table">
+<tr><th>技术</th><th>来源</th><th>论文</th><th>当前状态</th></tr>
+<tr><td>Transformer</td><td>Google Brain, 2017</td><td><a href="https://arxiv.org/abs/1706.03762" target="_blank">Attention Is All You Need</a></td><td>所有 LLM 基础架构</td></tr>
+<tr><td>MoE</td><td>早期 Google；DeepSeek/Mixtral 发扬</td><td><a href="https://arxiv.org/abs/1701.06538" target="_blank">Sparsely-Gated MoE Layer</a></td><td>主流趋势，GPT-4/DeepSeek-V3/Llama 4 均采用</td></tr>
+<tr><td>RLHF</td><td>OpenAI / Anthropic</td><td><a href="https://arxiv.org/abs/2203.02155" target="_blank">InstructGPT (Training LMs to Follow Instructions)</a></td><td>标准对齐方法</td></tr>
+<tr><td>DPO</td><td>Stanford, 2023</td><td><a href="https://arxiv.org/abs/2305.18290" target="_blank">Direct Preference Optimization</a></td><td>简化对齐，无需 Critic，被广泛采用</td></tr>
+<tr><td>GRPO</td><td>DeepSeek (R1)</td><td><a href="https://arxiv.org/abs/2402.03300" target="_blank">DeepSeekMath (GRPO 首次提出)</a></td><td>组相对策略优化，无 Critic 的 RL 方案</td></tr>
+<tr><td>Flash Attention</td><td>Tri Dao, Stanford</td><td><a href="https://arxiv.org/abs/2205.14135" target="_blank">FlashAttention</a> / <a href="https://arxiv.org/abs/2307.08691" target="_blank">FlashAttention-2</a></td><td>事实标准，所有框架集成</td></tr>
+<tr><td>RoPE</td><td>苏剑林 / Meta</td><td><a href="https://arxiv.org/abs/2104.09864" target="_blank">RoFormer: Rotary Position Embedding</a></td><td>主流位置编码方案</td></tr>
+<tr><td>GQA / MQA</td><td>Google</td><td><a href="https://arxiv.org/abs/1911.02150" target="_blank">MQA</a> / <a href="https://arxiv.org/abs/2305.13245" target="_blank">GQA</a></td><td>减少 KV Cache，广泛采用</td></tr>
+<tr><td>MLA</td><td>DeepSeek</td><td><a href="https://arxiv.org/abs/2405.04434" target="_blank">DeepSeek-V2</a></td><td>多头潜在注意力，KV Cache 压缩到极致</td></tr>
+</table>
+
+<h2>推理框架层</h2>
+
+<table class="info-table">
+<tr><th>框架</th><th>维护方</th><th>语言</th><th>核心技术</th><th>硬件支持</th><th>开源</th><th>当前状态</th></tr>
+<tr>
+  <td><strong><a href="https://github.com/vllm-project/vllm" target="_blank">vLLM</a></strong></td>
+  <td>UC Berkeley + 社区</td>
+  <td>Python/C++</td>
+  <td>PagedAttention、连续批处理</td>
+  <td>NVIDIA / AMD / TPU</td>
+  <td><span class="tag-open">Apache 2.0</span></td>
+  <td>当前部署量最大，生态最完善</td>
+</tr>
+<tr>
+  <td><strong><a href="https://github.com/sgl-project/sglang" target="_blank">SGLang</a></strong></td>
+  <td>UC Berkeley (LMSYS)</td>
+  <td>Python/Rust</td>
+  <td>RadixAttention（自动前缀缓存）、结构化输出优化</td>
+  <td>NVIDIA / AMD</td>
+  <td><span class="tag-open">Apache 2.0</span></td>
+  <td>吞吐基准测试领先，增长快</td>
+</tr>
+<tr>
+  <td><strong><a href="https://github.com/NVIDIA/TensorRT-LLM" target="_blank">TensorRT-LLM</a></strong></td>
+  <td>NVIDIA</td>
+  <td>C++/Python</td>
+  <td>图优化、算子融合、FP8/INT4 量化</td>
+  <td>仅 NVIDIA</td>
+  <td><span class="tag-partial">源码可见，非宽松协议</span></td>
+  <td>NVIDIA 硬件上延迟最低</td>
+</tr>
+<tr>
+  <td><strong><a href="https://github.com/ggerganov/llama.cpp" target="_blank">llama.cpp</a></strong></td>
+  <td>社区 (ggerganov)</td>
+  <td>C/C++</td>
+  <td>GGUF 量化、多后端（CPU/Metal/CUDA/Vulkan）</td>
+  <td>全平台</td>
+  <td><span class="tag-open">MIT</span></td>
+  <td>端侧/本地部署事实标准</td>
+</tr>
+<tr>
+  <td><strong><a href="https://github.com/ollama/ollama" target="_blank">Ollama</a></strong></td>
+  <td>Ollama Inc.</td>
+  <td>Go（封装 llama.cpp）</td>
+  <td>一键拉取运行，类 Docker 体验</td>
+  <td>全平台</td>
+  <td><span class="tag-open">MIT</span></td>
+  <td>个人开发者本地使用主流方案</td>
+</tr>
+<tr>
+  <td><strong><a href="https://github.com/huggingface/text-generation-inference" target="_blank">TGI</a></strong></td>
+  <td>Hugging Face</td>
+  <td>Rust/Python</td>
+  <td>与 HF 生态集成、生产级服务</td>
+  <td>NVIDIA / AMD</td>
+  <td><span class="tag-open">Apache 2.0</span></td>
+  <td>HF 用户常用，社区活跃度中等</td>
+</tr>
+</table>
+
+<h2>算子与硬件层</h2>
+
+<table class="info-table">
+<tr><th>组件</th><th>维护方</th><th>功能</th><th>开源</th><th>依赖关系</th></tr>
+<tr><td><strong><a href="https://github.com/Dao-AILab/flash-attention" target="_blank">Flash Attention</a></strong></td><td>Tri Dao</td><td>高效注意力 GPU 内核</td><td><span class="tag-open">BSD</span></td><td>vLLM、SGLang、TGI 均直接依赖</td></tr>
+<tr><td><strong><a href="https://github.com/NVIDIA/cutlass" target="_blank">CUTLASS</a></strong></td><td>NVIDIA</td><td>CUDA 矩阵乘法模板库</td><td><span class="tag-open">BSD</span></td><td>TensorRT-LLM 底层核心</td></tr>
+<tr><td><strong><a href="https://github.com/triton-lang/triton" target="_blank">Triton</a></strong></td><td>OpenAI（开源社区）</td><td>GPU 编程语言（高于 CUDA 的抽象）</td><td><span class="tag-open">MIT</span></td><td>vLLM/SGLang 自定义算子使用</td></tr>
+<tr><td><strong><a href="https://github.com/NVIDIA/nccl" target="_blank">NCCL</a></strong></td><td>NVIDIA</td><td>多 GPU 集合通信</td><td><span class="tag-open">BSD</span></td><td>所有多卡推理/训练必备</td></tr>
+<tr><td><strong>CUDA</strong></td><td>NVIDIA</td><td>GPU 编程平台</td><td><span class="tag-closed">私有</span></td><td>整个 NVIDIA GPU 生态基座</td></tr>
+</table>
+
+<h3>硬件平台</h3>
+
+<table class="info-table">
+<tr><th>硬件</th><th>厂商</th><th>定位</th><th>关键指标</th></tr>
+<tr><td>H100 / H200</td><td>NVIDIA</td><td>当前主力训练/推理卡</td><td>H100: 80GB HBM3, 3.35TB/s; H200: 141GB HBM3e</td></tr>
+<tr><td>B200 / GB200</td><td>NVIDIA</td><td>下一代（Blackwell）</td><td>192GB HBM3e, FP4 支持, 8TB/s</td></tr>
+<tr><td>MI300X</td><td>AMD</td><td>对标 H100</td><td>192GB HBM3, 5.3TB/s（带宽优势）</td></tr>
+<tr><td>Gaudi 3</td><td>Intel</td><td>训练/推理加速器</td><td>128GB HBM2e</td></tr>
+<tr><td>昇腾 910B/C</td><td>华为</td><td>国产替代</td><td>64GB HBM，自研达芬奇架构</td></tr>
+<tr><td>Cloud TPU v5p</td><td>Google</td><td>自用训练</td><td>Google 内部，不对外卖卡</td></tr>
+</table>
+
+<div class="note-block">
+量化技术现状：GPTQ/AWQ（4-bit 训练后量化）广泛使用；FP8（H100 原生支持）成为训练+推理新标准；投机解码（小模型草稿+大模型验证）在生产环境逐步采用。
+</div>
+
+</article>
