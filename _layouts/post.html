@@ -17,6 +17,10 @@ layout: default
     {{ content }}
   </div>
   <footer class="post-footer">
+    {% if page.topic and page.category %}
+    <a href="{{ '/' | append: page.category | append: '/' | append: page.topic | append: '/' | relative_url }}">&larr; 返回</a>
+    {% else %}
     <a href="javascript:history.back()">&larr; 返回</a>
+    {% endif %}
   </footer>
 </article>

@@ -1,0 +1,22 @@
+---
+layout: default
+---
+<div class="section-header">
+  <h1>{{ page.title }}</h1>
+  <p>{{ page.description }}</p>
+</div>
+
+<div class="topic-grid">
+  {% assign topics = site.data.topics[page.section_key] %}
+  {% for topic in topics %}
+    {% assign articles = site[page.collection] | where: "topic", topic.slug %}
+    <a href="{{ '/' | append: page.collection | append: '/' | append: topic.slug | append: '/' | relative_url }}" class="topic-card">
+      <div class="topic-card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">{{ topic.icon }}</svg>
+      </div>
+      <h3 class="topic-card-name">{{ topic.name }}</h3>
+      <p class="topic-card-desc">{{ topic.description }}</p>
+      <span class="topic-card-count">{{ articles.size }} 篇文章</span>
+    </a>
+  {% endfor %}
+</div>

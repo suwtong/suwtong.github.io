@@ -332,4 +332,123 @@ body {
   .section-header h1 {
     font-size: 1.5rem;
   }
+
+  .topic-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .topic-card {
+    padding: 20px 16px;
+  }
+}
+
+@media (max-width: 400px) {
+  .topic-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== Topic Card Grid ===== */
+.topic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  margin-top: 32px;
+}
+
+.topic-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  text-decoration: none;
+  color: #5a7a9a;
+  padding: 24px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(44, 74, 110, 0.08);
+  transition: all 0.3s ease;
+}
+
+.topic-card:hover {
+  color: #2c4a6e;
+  background: rgba(255, 255, 255, 0.95);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(100, 160, 210, 0.12);
+  border-color: rgba(123, 175, 212, 0.2);
+}
+
+.topic-card-icon {
+  width: 2rem;
+  height: 2rem;
+  color: #7bafd4;
+  margin-bottom: 4px;
+}
+
+.topic-card-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.topic-card-name {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #2c4a6e;
+  letter-spacing: 0.5px;
+}
+
+.topic-card-desc {
+  font-size: 0.85rem;
+  color: #7a9ab5;
+  line-height: 1.5;
+}
+
+.topic-card-count {
+  font-size: 0.75rem;
+  color: #9ab5cc;
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+/* ===== Breadcrumb ===== */
+.breadcrumb {
+  font-size: 0.85rem;
+  color: #7a9ab5;
+  margin-bottom: 8px;
+}
+
+.breadcrumb a {
+  color: #4a8ab5;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.breadcrumb a:hover {
+  color: #2c4a6e;
+}
+
+.breadcrumb-sep {
+  margin: 0 8px;
+  color: #b0c4d8;
+}
+
+/* ===== Empty State ===== */
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: #7a9ab5;
+}
+
+.empty-state-icon {
+  width: 3rem;
+  height: 3rem;
+  opacity: 0.35;
+  margin-bottom: 16px;
+  color: #7bafd4;
+}
+
+.empty-state p {
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
 }

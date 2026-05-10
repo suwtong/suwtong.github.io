@@ -2,6 +2,7 @@
 title: "GPU 线程调度基础概念"
 date: 2025-05-07
 tags: [GPU, 线程调度, SIMT]
+topic: gpgpu
 ---
 
 ## 概述

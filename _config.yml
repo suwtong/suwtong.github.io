@@ -23,6 +23,9 @@ collections:
   thoughts:
     output: true
     permalink: /thoughts/:title/
+  interests:
+    output: true
+    permalink: /interests/:title/
 
 # Defaults
 defaults:
@@ -38,6 +41,12 @@ defaults:
     values:
       layout: "post"
       category: "thoughts"
+  - scope:
+      path: ""
+      type: "interests"
+    values:
+      layout: "post"
+      category: "interests"
 
 # Markdown
 markdown: kramdown
